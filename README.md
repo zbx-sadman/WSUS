@@ -15,7 +15,7 @@ How to use:
 - Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
 - Enjoy.
 
-Hint: To see keys, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus_miner.ps1 -Action "Get" -Object "<Object>"_
+Hint: To see keys, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus_miner.ps1 -Action "Get" -Object "**Object**"_
 
 Beware: connection to WSUS is slow, don't use small timeouts with Data Items.
 
