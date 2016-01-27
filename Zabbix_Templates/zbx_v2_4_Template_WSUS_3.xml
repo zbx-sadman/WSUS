@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2016-01-27T07:56:26Z</date>
+    <date>2016-01-27T08:34:24Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -23,6 +23,9 @@ Requirements: WSUS 3.0 and above, PowerShell 2.0 and above</description>
                 </group>
             </groups>
             <applications>
+                <application>
+                    <name>WSUS Info</name>
+                </application>
                 <application>
                     <name>WSUS Status</name>
                 </application>
@@ -797,6 +800,49 @@ Requirements: WSUS 3.0 and above, PowerShell 2.0 and above</description>
                     <applications>
                         <application>
                             <name>WSUS Status</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                </item>
+                <item>
+                    <name>WSUS Server version</name>
+                    <type>0</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>wsus.miner[get,info,&quot;Version&quot;]</key>
+                    <delay>10800</delay>
+                    <history>7</history>
+                    <trends>365</trends>
+                    <status>0</status>
+                    <value_type>4</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <delta>0</delta>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>WSUS Info</name>
                         </application>
                     </applications>
                     <valuemap/>

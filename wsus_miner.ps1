@@ -4,29 +4,49 @@
 #
 
 Param (
-[string]$Action='Get',
-[string]$Object='Status',
+[string]$Action = 'Get',
+[string]$Object = 'Status',
 # try "UpdateCount"
-[string]$Key='UpdateCount'
+[string]$Key = 'UpdateCount'
 )
 
 [reflection.assembly]::LoadWithPartialName("Microsoft.UpdateServices.Administration") | out-null
 
+Function Connect-WSUSServer
+{ 
+  # connect on Local WSUS
+  $WSUS = ([Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer());
+  $WSUS;
+}
+
 Function Get-WSUSStatus
 { 
-  Param ($Key);
-  # connect on Local WSUS
-  (([Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer()).getstatus()).$Key;
+  Param ($key, $WSUS);
+  ($WSUS.getstatus()).$Key;
 }
+
+Function Get-WSUSInfo
+{ 
+  Param ($key, $WSUS);
+  ($WSUS.$Key) -join '.';
+}
+
 
 switch ($Object) 
   {
     ('Status')  
         {
-          $Result = Get-WSUSStatus($Key);
+          $objWSUS = Connect-WSUSServer;
+          $Result = Get-WSUSStatus -Key $key -WSUS $objWSUS;
         }
-    default  { $Result = "Incorrect object: '" + $Object + "'"; }
+    ('Info')  
+        {
+          $objWSUS = Connect-WSUSServer;
+          $Result = Get-WSUSInfo -Key $key -WSUS $objWSUS;
+        }
+    default  { $Result = "Incorrect object: '$Object'"; }
   }  
 
 $Result = ($Result | Out-String).trim();
 Write-Host $Result;
+
