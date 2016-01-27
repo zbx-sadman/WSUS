@@ -1,5 +1,5 @@
 ## WSUS Miner 
-This is a little Powershell script to mine metrics from WSUS 3.0 Server.
+This is a little Powershell script for fetch data from WSUS 3.0 Server.
 
 Support objects:
 - _Status_ - WSUS Status (Number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so);
