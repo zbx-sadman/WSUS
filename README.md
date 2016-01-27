@@ -6,7 +6,7 @@ How to use:
 - Put _wsus_miner.ps1_ to _C:\zabbix\scripts_ dir;
 - Make unsigned .ps1 script executable with _Set-ExecutionPolicy RemoteSigned_;
 - Set Zabbix Agent's _Timeout_ to more that 3 sec (may be 10 or 30);
-- Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server.
+- Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
 - Enjoy.
 
 
