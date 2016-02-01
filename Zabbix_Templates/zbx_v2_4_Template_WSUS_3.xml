@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2016-01-29T13:06:32Z</date>
+    <date>2016-02-01T07:50:58Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -44,7 +44,7 @@ Requirements: WSUS 3.0 and above, PowerShell 2.0 and above</description>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,synchronizationProcess,&quot;Status&quot;]</key>
-                    <delay>1800</delay>
+                    <delay>600</delay>
                     <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
@@ -95,13 +95,13 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,lastSynchronization,&quot;StartTime&quot;]</key>
-                    <delay>10800</delay>
+                    <delay>3600</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
-                    <units>unixtime</units>
+                    <units/>
                     <delta>0</delta>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -138,7 +138,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,lastSynchronization,&quot;Result&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
@@ -189,7 +189,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;ApprovedUpdateCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -232,7 +232,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;UpdatesWithClientErrorsCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -275,7 +275,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;DeclinedUpdateCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -318,7 +318,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;ExpiredUpdateCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -361,7 +361,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;UpdatesUpToDateCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -404,7 +404,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;UpdatesNeedingFilesCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -447,7 +447,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;CriticalOrSecurityUpdatesNotApprovedForInstallCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -490,7 +490,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;NotApprovedUpdateCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -533,7 +533,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;UpdatesWithServerErrorsCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -576,7 +576,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;CustomComputerTargetGroupCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -619,7 +619,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;ComputerTargetsWithUpdateErrorsCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -656,13 +656,56 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <logtimefmt/>
                 </item>
                 <item>
+                    <name>Number of days from last synchronization</name>
+                    <type>0</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>wsus.miner[get,lastSynchronization,&quot;NotSyncInDays&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7</history>
+                    <trends>90</trends>
+                    <status>0</status>
+                    <value_type>3</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <delta>0</delta>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>WSUS Synchronization</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                </item>
+                <item>
                     <name>Number of full updated clients</name>
                     <type>0</type>
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;ComputersUpToDateCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -705,7 +748,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;ComputerTargetCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -748,7 +791,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;UpdatesWithStaleUpdateApprovalsCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -791,7 +834,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;ComputerTargetsNeedingUpdatesCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -834,7 +877,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;UpdatesNeededByComputersCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -877,7 +920,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;WsusInfrastructureUpdatesNotApprovedForInstallCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -920,7 +963,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <multiplier>0</multiplier>
                     <snmp_oid/>
                     <key>wsus.miner[get,status,&quot;UpdateCount&quot;]</key>
-                    <delay>3600</delay>
+                    <delay>1800</delay>
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
@@ -1041,7 +1084,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                             <multiplier>0</multiplier>
                             <snmp_oid/>
                             <key>wsus.miner[get,computerGroup,&quot;ComputerTargetsWithUpdateErrorsCount&quot;,{#ID}]</key>
-                            <delay>3600</delay>
+                            <delay>1800</delay>
                             <history>7</history>
                             <trends>90</trends>
                             <status>0</status>
@@ -1084,7 +1127,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                             <multiplier>0</multiplier>
                             <snmp_oid/>
                             <key>wsus.miner[get,computerGroup,&quot;ComputerTargetsUnknownCount&quot;,{#ID}]</key>
-                            <delay>3600</delay>
+                            <delay>1800</delay>
                             <history>7</history>
                             <trends>90</trends>
                             <status>0</status>
@@ -1127,7 +1170,50 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                             <multiplier>0</multiplier>
                             <snmp_oid/>
                             <key>wsus.miner[get,computerGroup,&quot;ComputersUpToDateCount&quot;,{#ID}]</key>
-                            <delay>3600</delay>
+                            <delay>1800</delay>
+                            <history>7</history>
+                            <trends>90</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>WSUS Computer groups</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                            <logtimefmt/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>[{#NAME}] Number of known client</name>
+                            <type>7</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>wsus.miner[get,computerGroup,&quot;ComputerTargetCount&quot;,{#ID}]</key>
+                            <delay>1800</delay>
                             <history>7</history>
                             <trends>90</trends>
                             <status>0</status>
@@ -1170,7 +1256,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                             <multiplier>0</multiplier>
                             <snmp_oid/>
                             <key>wsus.miner[get,computerGroup,&quot;ComputerTargetsNeedingUpdatesCount&quot;,{#ID}]</key>
-                            <delay>3600</delay>
+                            <delay>1800</delay>
                             <history>7</history>
                             <trends>90</trends>
                             <status>0</status>
@@ -1210,7 +1296,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <trigger_prototypes/>
                     <graph_prototypes>
                         <graph_prototype>
-                            <name>[{#NAME}] Clients report</name>
+                            <name>[{#NAME}] Client report</name>
                             <width>900</width>
                             <height>200</height>
                             <yaxismin>0.0000</yaxismin>
@@ -1228,7 +1314,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                             <ymax_item_1>0</ymax_item_1>
                             <graph_items>
                                 <graph_item>
-                                    <sortorder>0</sortorder>
+                                    <sortorder>1</sortorder>
                                     <drawtype>0</drawtype>
                                     <color>CC0000</color>
                                     <yaxisside>0</yaxisside>
@@ -1242,6 +1328,18 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                 <graph_item>
                                     <sortorder>2</sortorder>
                                     <drawtype>0</drawtype>
+                                    <color>AAAA00</color>
+                                    <yaxisside>0</yaxisside>
+                                    <calc_fnc>4</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App WSUS 3.0</host>
+                                        <key>wsus.miner[get,computerGroup,&quot;ComputerTargetsNeedingUpdatesCount&quot;,{#ID}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>3</sortorder>
+                                    <drawtype>0</drawtype>
                                     <color>00CC00</color>
                                     <yaxisside>0</yaxisside>
                                     <calc_fnc>4</calc_fnc>
@@ -1249,6 +1347,62 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <item>
                                         <host>Template App WSUS 3.0</host>
                                         <key>wsus.miner[get,computerGroup,&quot;ComputersUpToDateCount&quot;,{#ID}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>4</sortorder>
+                                    <drawtype>0</drawtype>
+                                    <color>555555</color>
+                                    <yaxisside>0</yaxisside>
+                                    <calc_fnc>4</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App WSUS 3.0</host>
+                                        <key>wsus.miner[get,computerGroup,&quot;ComputerTargetsUnknownCount&quot;,{#ID}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>0</sortorder>
+                                    <drawtype>0</drawtype>
+                                    <color>0000CC</color>
+                                    <yaxisside>0</yaxisside>
+                                    <calc_fnc>4</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App WSUS 3.0</host>
+                                        <key>wsus.miner[get,computerGroup,&quot;ComputerTargetCount&quot;,{#ID}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <name>[{#NAME}] Client report (pie)</name>
+                            <width>600</width>
+                            <height>600</height>
+                            <yaxismin>0.0000</yaxismin>
+                            <yaxismax>0.0000</yaxismax>
+                            <show_work_period>0</show_work_period>
+                            <show_triggers>0</show_triggers>
+                            <type>2</type>
+                            <show_legend>1</show_legend>
+                            <show_3d>0</show_3d>
+                            <percent_left>0.0000</percent_left>
+                            <percent_right>0.0000</percent_right>
+                            <ymin_type_1>0</ymin_type_1>
+                            <ymax_type_1>0</ymax_type_1>
+                            <ymin_item_1>0</ymin_item_1>
+                            <ymax_item_1>0</ymax_item_1>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>0</sortorder>
+                                    <drawtype>0</drawtype>
+                                    <color>CC0000</color>
+                                    <yaxisside>0</yaxisside>
+                                    <calc_fnc>4</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App WSUS 3.0</host>
+                                        <key>wsus.miner[get,computerGroup,&quot;ComputerTargetsWithUpdateErrorsCount&quot;,{#ID}]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -1261,6 +1415,18 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <item>
                                         <host>Template App WSUS 3.0</host>
                                         <key>wsus.miner[get,computerGroup,&quot;ComputerTargetsNeedingUpdatesCount&quot;,{#ID}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>2</sortorder>
+                                    <drawtype>0</drawtype>
+                                    <color>00CC00</color>
+                                    <yaxisside>0</yaxisside>
+                                    <calc_fnc>4</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App WSUS 3.0</host>
+                                        <key>wsus.miner[get,computerGroup,&quot;ComputersUpToDateCount&quot;,{#ID}]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -1281,7 +1447,12 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <host_prototypes/>
                 </discovery_rule>
             </discovery_rules>
-            <macros/>
+            <macros>
+                <macro>
+                    <macro>{$NOTSYNCINDAYS_MAX}</macro>
+                    <value>1</value>
+                </macro>
+            </macros>
             <templates/>
             <screens/>
         </template>
@@ -1358,8 +1529,8 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[get,lastSynchronization,&quot;StartTime&quot;].diff()}=0</expression>
-            <name>WSUS Server stop syncing</name>
+            <expression>{Template App WSUS 3.0:wsus.miner[get,lastSynchronization,&quot;NotSyncInDays&quot;].last()}&gt;{$NOTSYNCINDAYS_MAX}</expression>
+            <name>WSUS Server synchronization is not held for more than {ITEM.LASTVALUE1} days</name>
             <url/>
             <status>0</status>
             <priority>1</priority>

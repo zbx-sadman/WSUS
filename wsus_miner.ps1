@@ -55,35 +55,39 @@ Function Make-JSON {
 
 Function Get-WSUSLastSynchronizationInfo ([PSObject]$WSUS, [string]$key) { 
   $Result = ($WSUS.GetSubscription()).GetLastSynchronizationInfo();
+
   # check for Key existience
   switch ($key) {
      # Key is 'StartTime'. Need to make Unix timestamp from DateTime object and replace 'StartTime' Property with it
-     ('StartTime') { New-Object PSObject -Property @{ $key = ($Result.$key.DateTime | ConvertTo-UnixTime) }}; 
+     ('StartTime')      { New-Object PSObject -Property @{ $key = ($Result.$key.DateTime | ConvertTo-UnixTime) }}; 
+     ('NotSyncInDays')  { New-Object PSObject -Property @{ $key = (New-TimeSpan -Start $Result.StartTime.DateTime -End (Get-Date)).Days }};
      # Otherwise - just return object
      default {$Result;}
   }  
-  
 }
 
 Function Get-WSUSTotalSummaryPerGroupTarget ([PSObject]$WSUS, [string]$key, [string]$Id) { 
   # Take all computers into Group with specific ID
-  $ComputerTargets = ($objWSUS.GetComputerTargetGroup($Id)).GetTotalSummaryPerComputerTarget()
+  $ComputerTargets = ($objWSUS.GetComputerTargetGroup($Id)).GetTotalSummaryPerComputerTarget();
 
   # Analyzing Key and count how much computers present into collection from selection 
   switch ($key) {
+     ('ComputerTargetCount') {
+         $Result = ($ComputerTargets | measure).Count;
+     }               
      ('ComputerTargetsWithUpdateErrorsCount') {
          # Select and count all computers with property FailedCount > 0
-         $Result = (($ComputerTargets | Where { $_.FailedCount -gt 0 }) | measure).Count
+         $Result = (($ComputerTargets | Where { $_.FailedCount -gt 0 }) | measure).Count;
      }
      ('ComputerTargetsNeedingUpdatesCount') {
-        $Result = (($ComputerTargets | Where { ($_.NotInstalledCount -gt 0 -Or $_.DownloadedCount -gt 0 -Or $_.InstalledPendingRebootCount -gt 0) -And $_.FailedCount -le 0}) | measure).Count
+        $Result = (($ComputerTargets | Where { ($_.NotInstalledCount -gt 0 -Or $_.DownloadedCount -gt 0 -Or $_.InstalledPendingRebootCount -gt 0) -And $_.FailedCount -le 0}) | measure).Count;
      }                    
      ('ComputersUpToDateCount') {
          # why .Count without `measure` not give 1 with UnknownCount = 0?  ("only warpig in select" case)
-         $Result = (($ComputerTargets | Where { $_.UnknownCount -eq 0 -And $_.NotInstalledCount -eq 0 -And $_.DownloadedCount -le 0 -And $_.InstalledPendingRebootCount -le 0 -And $_.FailedCount -le 0 }) | measure).Count   
+         $Result = (($ComputerTargets | Where { $_.UnknownCount -eq 0 -And $_.NotInstalledCount -eq 0 -And $_.DownloadedCount -le 0 -And $_.InstalledPendingRebootCount -le 0 -And $_.FailedCount -le 0 }) | measure).Count;   
      }                    
      ('ComputerTargetsUnknownCount') {
-         $Result = (($ComputerTargets | Where { $_.UnknownCount -gt 0 -And $_.NotInstalledCount -le 0 -And $_.DownloadedCount -le 0 -And $_.InstalledPendingRebootCount -le 0 -And $_.FailedCount -le 0 }) | measure).Count
+         $Result = (($ComputerTargets | Where { $_.UnknownCount -gt 0 -And $_.NotInstalledCount -le 0 -And $_.DownloadedCount -le 0 -And $_.InstalledPendingRebootCount -le 0 -And $_.FailedCount -le 0 }) | measure).Count;
      }               
   }
 
@@ -141,4 +145,3 @@ $Result = ($Result | Out-String).trim();
 if ($consoleCP) { $Result = $Result | ConvertTo-Encoding -From $consoleCP -To UTF-8 }
 
 Write-Host $Result;
-
