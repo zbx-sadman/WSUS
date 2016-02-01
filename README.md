@@ -25,5 +25,5 @@ Hints:
 - To see keys, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus_miner.ps1 -Action "Get" -Object "**Object**"_
 - If you use non-english (for example Russian Cyrillic) symbols into Computer Group's names and want to get correct UTF-8 on Zabbix Server side, then you must add _-consoleCP **your_native_codepage**_ parameter to command line. For example to convert from Russian Cyrillic codepage (CP866), use _powershell -File C:\zabbix\scripts\wsus_miner.ps1 -Action "$1" -Object "$2" -Key "$3" -Id "$4" -consoleCP CP866_.
 
-Beware: frequent connections to WSUS may be nuke it and yours requests will be processeed slowly. To avoid it - don't use small update intervals with Zabbix's Data Items and disable unused.
+Beware: frequent connections to WSUS may be nuke host server and yours requests will be processeed slowly. To avoid it - don't use small update intervals with Zabbix's Data Items and disable unused.
 
