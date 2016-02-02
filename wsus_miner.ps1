@@ -49,22 +49,23 @@ Function Make-JSON {
   # Init JSON-string $InObject
   $Result += "{$CRLF$Space`"data`":[$CRLF";
   # Take each Item from $InObject, get Properties that equal $ObjectProperties items and make JSON from its
-  $nCntObject = 0; $nMaxObject = $InObject | How-Much
-  $nMaxObjectProps =  $ObjectProperties | How-Much;
+  $itFirstObject = $True;
   ForEach ($Object in $InObject) {
+     if (-Not $itFirstObject) { $Result += ",$CRLF"; }
+     $itFirstObject=$False;
      $Result += "$Tab$Tab{$Space"; 
-     $nCntObject++; 
-     $nCntObjectProps = 0;
+     $itFirstProperty = $True;
      # Process properties. No comma printed after last item
      ForEach ($Property in $ObjectProperties) {
-        $nCntObjectProps++; 
-        $Result += "`"{#$Property}`":$Space`"$($Object.$Property)`"$(&{if ($nCntObjectProps -lt $nMaxObjectProps) {",$Space"} })"
+        if (-Not $itFirstProperty) { $Result += ",$Space" }
+        $itFirstProperty = $False;
+        $Result += "`"{#$Property}`":$Space`"$($Object.$Property)`""
      }
      # No comma printed after last string
-     $Result += " }$(&{if ($nCntObject -lt $nMaxObject) {",$Space"} })$CRLF";
+     $Result += "$Space}";
   }
   # Finalize and return JSON
-  "$Result$Space]$CRLF}";
+  "$Result$CRLF$Tab]$CRLF}";
 }
 
 Function How-Much { 
