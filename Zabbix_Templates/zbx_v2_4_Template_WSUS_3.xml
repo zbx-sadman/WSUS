@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2016-02-01T07:50:58Z</date>
+    <date>2016-02-02T13:30:22Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -101,7 +101,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <status>0</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
-                    <units/>
+                    <units>unixtime</units>
                     <delta>0</delta>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
