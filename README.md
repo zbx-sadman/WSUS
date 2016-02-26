@@ -1,31 +1,66 @@
 ## WSUS Miner 
-This is a little Powershell script that fetch metric's values from WSUS 3.0 Server.
+This is a little Powershell script that fetch metric's values from Microsoft WSUS 3.0 Server.
+
+Actual release 1.0.0
+
+Tested on Windows Server 2008 R2 SP1 + WSUS 3.0.
 
 Support objects:
-- _Status_ - WSUS Status (Number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so);
-- _Info_ - Some WSUS Settings;
-- _synchronizationProcess_ - Synchronization process status;
-- _lastSynchronization_ - Last Synchronization data;
-- _database_ - WSUS Database related info;
-- _configuration_ - WSUS configuration info;
-- _computerGroup_ - Virtual object to taking computer group statistic (keys: _ComputerTargetsWithUpdateErrorsCount_, _ComputerTargetsNeedingUpdatesCount_, _ComputersUpToDateCount_, _ComputerTargetsUnknownCount_).
+- _Info_                   - WSUS informaton;
+- _Status_                 - WSUS status (number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so);
+- _Database_               - WSUS database related info;
+- _Configuration_          - WSUS configuration info;
+- _ComputerGroup_          - Virtual object to taking computer group statistic;
+- _LastSynchronization_    - Last Synchronization data;
+- _SynchronizationProcess_ - Synchronization process status (haven't keys).
+
+Actions:
+- _Discovery_ - Make Zabbix's LLD JSON;
+- _Get_       - Get object metric's value;
+- _Count_     - Take number of objects in collection (selected with _ComputersUpToDate_ key, for example).
 
 Zabbix's LLD available to:
-- _computerGroup_ 
+- _ComputerGroup_ 
 
-How to use:
-- Make setting to make unsigned .ps1 scripts executable at all time with _powershell.exe -command "Set-ExecutionPolicy RemoteSigned"_ or at once with _-ExecutionPolicy_ command line option;
-- Just add to Zabbix Agent config, which run on WSUS host this string: _UserParameter=wsus.miner[*], powershell -NoProfile -ExecutionPolicy "RemoteSigned" -File C:\zabbix\scripts\wsus_miner.ps1 -Action "$1" -Object "$2" -Key "$3" -Id "$4"_ 
-- Put _wsus_miner.ps1_ to _C:\zabbix\scripts_ dir; 
-- Set Zabbix Agent's / Server's _Timeout_ to more that 3 sec (may be 10 or 30);
-- Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
-- Enjoy.
+Virtual keys for _ComputerGroup_ object is:
+- _ComputerTargetsWithUpdateErrors_ - Computers updated with errors;
+- _ComputerTargetsNeedingUpdates_   - Partially updated computers;
+- _ComputersUpToDate_               - Full updated computers;
+- _ComputerTargetsUnknown_          - Computers without update information.
+
+Virtual keys for _LastSynchronization_ object is:
+- _NotSyncInDays_ - Now much days was not running Synchronization process;
+
+###How to use standalone
+
+    # Make Zabbix's LLD JSON for 'ComputerGroup' object. Group names contais Russian Cyrillic symbols
+    ... "wsfc.ps1" -Action "Discovery" -Object "ComputerGroup" -consoleCP CP866
+
+    # Show all metrics of 'Configuration' object and see verbose messages
+    ... "wsfc.ps1" -Action "Get" -Object "Configuration" -Verbose
+
+    # Get number of days passed since the last synchronization
+    powershell -NoProfile -ExecutionPolicy "RemoteSigned" -File "wsus_miner.ps1" -Action "Get" -Object "LastSynchronization" -Key "NotSyncInDays"
+
+    # Get number of computers that have update errors and placed in ComputerGroup with ID=e4b8b165-4e29-42ec-ac40-66178600ca9b
+    ..."wsus_miner.ps1" -Action "Count" -Object "ComputerGroup" -Key "ComputerTargetsWithUpdateErrors" -Id "e4b8b165-4e29-42ec-ac40-66178600ca9b"
+
+
+###How to use with Zabbix
+1. Make setting to make unsigned .ps1 scripts executable for all time with _powershell.exe -command "Set-ExecutionPolicy RemoteSigned"_ or for once with _-ExecutionPolicy_ command line option;
+2. Just include [zbx\_wsus\_miner.conf](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates/zbx_wsus_miner.conf) to Zabbix Agent config
+3. Put _wsus\_miner.ps1_ to _C:\zabbix\scripts_ dir; 
+4. Set Zabbix Agent's / Server's _Timeout_ to more that 3 sec (may be 10 or 30);
+5. Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
+6. Be sure that Zabbix Agent worked in Active mode - in template used 'Zabbix agent(active)' poller type. Otherwise - change its to 'Zabbix agent' and increase value of server's StartPollers parameter;
+7. Enjoy.
 
 **Note**
 Do not try import Zabbix v2.4 template to Zabbix _pre_ v2.4. You need to edit .xml file and make some changes at discovery_rule - filter tags area and change _#_ to _<>_ in trigger expressions. I will try to make template to old Zabbix.
 
-Hints:
-- To see keys, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus_miner.ps1 -Action "Get" -Object "**Object**"_
-- If you use non-english (for example Russian Cyrillic) symbols into Computer Group's names and want to get correct UTF-8 on Zabbix Server side, then you must add _-consoleCP **your_native_codepage**_ parameter to command line. For example to convert from Russian Cyrillic codepage (CP866), use _powershell -File C:\zabbix\scripts\wsus_miner.ps1 -Action "$1" -Object "$2" -Key "$3" -Id "$4" -consoleCP CP866_.
+###Hints
+- To see available metrics, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus\_miner.ps1 -Action "Get" -Object "Status"_
+- To measure script runtime use _Verbose_ command line switch;
+- To get on Zabbix Server side properly UTF-8 output when have non-english (for example Russian Cyrillic) symbols in Computer Group's names, use  _-consoleCP **your_native_codepage**_ command line option. For example to convert from Russian Cyrillic codepage (CP866): _...wsus\_miner.ps1 ... -consoleCP CP866_.
 
 Beware: frequent connections to WSUS may be nuke host server and yours requests will be processeed slowly. To avoid it - don't use small update intervals with Zabbix's Data Items and disable unused.
