@@ -33,14 +33,14 @@ Virtual keys for _LastSynchronization_ object is:
 
 ###How to use standalone
 
-    # Make Zabbix's LLD JSON for 'ComputerGroup' object. Group names contais Russian Cyrillic symbols
+    # Show all metrics of 'Configuration' object and see verbose messages
+    powershell -NoProfile -ExecutionPolicy "RemoteSigned" -File "wsus_miner.ps1" -Action "Get" -Object "Configuration" -Verbose
+
+    # Make Zabbix's LLD JSON for 'ComputerGroup' object. Group names contains Russian Cyrillic symbols
     ... "wsfc.ps1" -Action "Discovery" -Object "ComputerGroup" -consoleCP CP866
 
-    # Show all metrics of 'Configuration' object and see verbose messages
-    ... "wsfc.ps1" -Action "Get" -Object "Configuration" -Verbose
-
     # Get number of days passed since the last synchronization
-    powershell -NoProfile -ExecutionPolicy "RemoteSigned" -File "wsus_miner.ps1" -Action "Get" -Object "LastSynchronization" -Key "NotSyncInDays"
+    ... "wsfc.ps1" -Action "Get" -Object "LastSynchronization" -Key "NotSyncInDays"
 
     # Get number of computers that have update errors and placed in ComputerGroup with ID=e4b8b165-4e29-42ec-ac40-66178600ca9b
     ..."wsus_miner.ps1" -Action "Count" -Object "ComputerGroup" -Key "ComputerTargetsWithUpdateErrors" -Id "e4b8b165-4e29-42ec-ac40-66178600ca9b"
@@ -48,7 +48,7 @@ Virtual keys for _LastSynchronization_ object is:
 
 ###How to use with Zabbix
 1. Make setting to make unsigned .ps1 scripts executable for all time with _powershell.exe -command "Set-ExecutionPolicy RemoteSigned"_ or for once with _-ExecutionPolicy_ command line option;
-2. Just include [zbx\_wsus\_miner.conf](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates/zbx_wsus_miner.conf) to Zabbix Agent config
+2. Just include [zbx\_wsus\_miner.conf](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates/zbx_wsus_miner.conf) to Zabbix Agent config;
 3. Put _wsus\_miner.ps1_ to _C:\zabbix\scripts_ dir; 
 4. Set Zabbix Agent's / Server's _Timeout_ to more that 3 sec (may be 10 or 30);
 5. Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
@@ -59,8 +59,8 @@ Virtual keys for _LastSynchronization_ object is:
 Do not try import Zabbix v2.4 template to Zabbix _pre_ v2.4. You need to edit .xml file and make some changes at discovery_rule - filter tags area and change _#_ to _<>_ in trigger expressions. I will try to make template to old Zabbix.
 
 ###Hints
-- To see available metrics, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus\_miner.ps1 -Action "Get" -Object "Status"_
+- To see available metrics, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus\_miner.ps1 -Action "Get" -Object "Status"_;
 - To measure script runtime use _Verbose_ command line switch;
 - To get on Zabbix Server side properly UTF-8 output when have non-english (for example Russian Cyrillic) symbols in Computer Group's names, use  _-consoleCP **your_native_codepage**_ command line option. For example to convert from Russian Cyrillic codepage (CP866): _...wsus\_miner.ps1 ... -consoleCP CP866_.
 
-Beware: frequent connections to WSUS may be nuke host server and yours requests will be processeed slowly. To avoid it - don't use small update intervals with Zabbix's Data Items and disable unused.
+Beware: frequent connections to WSUS may be nuke host server, make over 9000% CPU utilization and yours requests will be processeed slowly. To avoid it - don't use small update intervals with Zabbix's Data Items and disable unused.
