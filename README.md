@@ -3,7 +3,7 @@ This is a little Powershell script that fetch metric's values from Microsoft WSU
 
 Actual release 1.0.0
 
-Tested on Windows Server 2008 R2 SP1 + WSUS 3.0.
+Tested on Windows Server 2008 R2 SP1, WSUS 3.0 SP1, Powershell 2.0
 
 Support objects:
 - _Info_                   - WSUS informaton;
@@ -29,7 +29,7 @@ Virtual keys for _ComputerGroup_ object is:
 - _ComputerTargetsUnknown_          - Computers without update information.
 
 Virtual keys for _LastSynchronization_ object is:
-- _NotSyncInDays_ - Now much days was not running Synchronization process;
+- _NotSyncInDays_ - Now much days was not running Synchronization process.
 
 ###How to use standalone
 
@@ -61,6 +61,9 @@ Do not try import Zabbix v2.4 template to Zabbix _pre_ v2.4. You need to edit .x
 ###Hints
 - To see available metrics, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus\_miner.ps1 -Action "Get" -Object "Status"_;
 - To measure script runtime use _Verbose_ command line switch;
-- To get on Zabbix Server side properly UTF-8 output when have non-english (for example Russian Cyrillic) symbols in Computer Group's names, use  _-consoleCP **your_native_codepage**_ command line option. For example to convert from Russian Cyrillic codepage (CP866): _...wsus\_miner.ps1 ... -consoleCP CP866_.
+- To get on Zabbix Server side properly UTF-8 output when have non-english (for example Russian Cyrillic) symbols in Computer Group's names, use  _-consoleCP **your_native_codepage**_ command line option. For example to convert from Russian Cyrillic codepage (CP866): _...wsus\_miner.ps1 ... -consoleCP CP866_;
+- If u need additional symbol escaping in LLD JSON - just add one more calls of _$InObject.Replace(...)_  in _Prepare-ToZabbix_ function;
+- Running the script with PowerShell 3 and above may be require to enable PowerShell 2 compatible mode;
+- To measure script runtime use _Verbose_ command line switch,
 
 Beware: frequent connections to WSUS may be nuke host server, make over 9000% CPU utilization and yours requests will be processeed slowly. To avoid it - don't use small update intervals with Zabbix's Data Items and disable unused.
