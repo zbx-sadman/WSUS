@@ -61,7 +61,7 @@ Do not try import Zabbix v2.4 template to Zabbix _pre_ v2.4. You need to edit .x
 - To see available metrics, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus\_miner.ps1 -Action "Get" -Object "Status"_;
 - To measure script runtime use _Verbose_ command line switch;
 - To get on Zabbix Server side properly UTF-8 output when have non-english (for example Russian Cyrillic) symbols in Computer Group's names, use  _-consoleCP **your_native_codepage**_ command line option. For example to convert from Russian Cyrillic codepage (CP866): _...wsus\_miner.ps1 ... -consoleCP CP866_;
-- If u need additional symbol escaping in LLD JSON - just add one more calls of _$InObject.Replace(...)_  in _Prepare-ToZabbix_ function;
+- If u need additional symbol escaping in LLD JSON - just add one more calls of _$InObject = $InObject.Replace(...)_  in _Prepare-ToZabbix_ function;
 - Running the script with PowerShell 3 and above may be require to enable PowerShell 2 compatible mode;
 - To measure script runtime use _Verbose_ command line switch,
 

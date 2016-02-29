@@ -118,7 +118,10 @@ Function Prepare-ToZabbix {
      [PSObject]$InObject
   );
   $InObject = ($InObject.ToString());
-  $InObject.Replace("`"", "\`"");
+
+  $InObject = $InObject.Replace("`"", "\`"");
+
+  $InObject;
 }
 
 #
