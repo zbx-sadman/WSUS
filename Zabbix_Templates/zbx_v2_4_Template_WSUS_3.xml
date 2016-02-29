@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2016-02-26T12:43:37Z</date>
+    <date>2016-02-29T08:30:02Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -23,6 +23,9 @@ Requirements: WSUS v3.0 and above, PowerShell v2.0 and above, wsus_miner.ps1 v1.
                 </group>
             </groups>
             <applications>
+                <application>
+                    <name>WSUS cache</name>
+                </application>
                 <application>
                     <name>WSUS Computer groups</name>
                 </application>
@@ -142,7 +145,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <history>7</history>
                     <trends>90</trends>
                     <status>0</status>
-                    <value_type>3</value_type>
+                    <value_type>0</value_type>
                     <allowed_hosts/>
                     <units>unixtime</units>
                     <delta>0</delta>
@@ -220,6 +223,49 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <applications>
                         <application>
                             <name>WSUS Synchronization</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                </item>
+                <item>
+                    <name>Local content cache path</name>
+                    <type>7</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>wsus.miner[Get,Configuration,LocalContentCachePath]</key>
+                    <delay>3600</delay>
+                    <history>7</history>
+                    <trends>365</trends>
+                    <status>1</status>
+                    <value_type>4</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <delta>0</delta>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description>The path of the local content cache.</description>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>WSUS cache</name>
                         </application>
                     </applications>
                     <valuemap/>
@@ -1135,7 +1181,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <type>0</type>
                     <snmp_community/>
                     <snmp_oid/>
-                    <key>wsus.miner[discovery,computerGroup]</key>
+                    <key>wsus.miner[Discovery,ComputerGroup]</key>
                     <delay>3600</delay>
                     <status>0</status>
                     <allowed_hosts/>
