@@ -1,7 +1,7 @@
 ## WSUS Miner 
 This is a little Powershell script that fetch metric's values from Microsoft WSUS 3.0 Server.
 
-Actual release 1.0.0
+Actual release 1.0.1
 
 Tested on Windows Server 2008 R2 SP1, WSUS 3.0 SP1, Powershell 2.0
 
