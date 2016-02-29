@@ -45,7 +45,6 @@ Virtual keys for _LastSynchronization_ object is:
     # Get number of computers that have update errors and placed in ComputerGroup with ID=e4b8b165-4e29-42ec-ac40-66178600ca9b
     ..."wsus_miner.ps1" -Action "Count" -Object "ComputerGroup" -Key "ComputerTargetsWithUpdateErrors" -Id "e4b8b165-4e29-42ec-ac40-66178600ca9b"
 
-
 ###How to use with Zabbix
 1. Make setting to make unsigned .ps1 scripts executable for all time with _powershell.exe -command "Set-ExecutionPolicy RemoteSigned"_ or for once with _-ExecutionPolicy_ command line option;
 2. Just include [zbx\_wsus\_miner.conf](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates/zbx_wsus_miner.conf) to Zabbix Agent config;

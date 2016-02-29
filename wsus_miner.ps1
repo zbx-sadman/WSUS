@@ -18,30 +18,30 @@
     .PARAMETER Action
         What need to do with collection or its item:
             Discovery - Make Zabbix's LLD JSON;
-            Get - get metric from collection item;
-            Count - count collection items.
+            Get - get metric from collection item
+            Count - count collection items
 
     .PARAMETER Object
         Define rule to make collection:
-            Info                    - WSUS informaton;
-            Status                  - WSUS status (number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so);
-            Database                - WSUS database related info;
-            Configuration           - WSUS configuration info;
-            ComputerGroup           - Virtual object to taking computer group statistic;
-            LastSynchronization     - Last Synchronization data;
-            SynchronizationProcess  - Synchronization process status (haven't keys).
+            Info                    - WSUS informaton
+            Status                  - WSUS status (number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so)
+            Database                - WSUS database related info
+            Configuration           - WSUS configuration info
+            ComputerGroup           - Virtual object to taking computer group statistic
+            LastSynchronization     - Last Synchronization data
+            SynchronizationProcess  - Synchronization process status (haven't keys)
 
     .PARAMETER Key
         Define "path" to collection item's metric 
 
         Virtual keys for 'ComputerGroup' object:
-            ComputerTargetsWithUpdateErrorsCount - Computers updated with errors;
-            ComputerTargetsNeedingUpdatesCount   - Partially updated computers;
-            ComputersUpToDateCount               - Full updated computers;
-            ComputerTargetsUnknownCount          - Computers without update information.
+            ComputerTargetsWithUpdateErrorsCount - Computers updated with errors 
+            ComputerTargetsNeedingUpdatesCount   - Partially updated computers
+            ComputersUpToDateCount               - Full updated computers
+            ComputerTargetsUnknownCount          - Computers without update information 
 
         Virtual keys for 'LastSynchronization' object:
-            NotSyncInDays                        - Now much days was not running Synchronization process.
+            NotSyncInDays                        - Now much days was not running Synchronization process;
 
     .PARAMETER Id
         Used to select only one item from collection
@@ -227,7 +227,7 @@ Function Get-WSUSComputerTargetGroupInfo  {
    $ComputerTargetGroups = $WSUS.GetComputerTargetGroups() | IDEqualOrAny $Id;
    If (-Not $ComputerTargetGroups) {
       Write-Error "Group with ID = '$Id' does not exist in WSUS!";
-      Break;
+      Exit;
    }
 
    if ('Discovery' -eq $Action) {
@@ -283,7 +283,7 @@ $WSUS = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
 if (!$WSUS)
    {
      Write-Warning "$(Get-Date) Connection failed";
-     Break;
+     Exit;
    }
 Write-Verbose "$(Get-Date) Connection established";
 
@@ -309,7 +309,7 @@ switch ($Object) {
    'SynchronizationProcess' { $doAction = $False; $Result = ($WSUS.GetSubscription()).GetSynchronizationStatus(); }
    default                  { 
                               Write-Error "Unknown object: '$Object'";
-                              Break;
+                              Exit;
                             }
 }  
 
@@ -317,7 +317,7 @@ Write-Verbose "$(Get-Date) Collection created";
 #$Objects 
 
 if ($doAction) { 
-   Write-Verbose "$(Get-Date) Processing collection with action: '$Action' ";
+   Write-Verbose "$(Get-Date) Processing collection with action: '$Action'";
    switch ($Action) {
       # Discovery given object, make json for zabbix
       'Discovery' {
@@ -344,8 +344,8 @@ if ($doAction) {
           $Result = $(if ($Objects) { @($Objects).Count } else { 0 } ); 
       }
       default  { 
-          Write-Error "Unknown action: '$Object'";
-          Break;
+          Write-Error "Unknown action: '$Action'";
+          Exit;
       }
    }  
 }
