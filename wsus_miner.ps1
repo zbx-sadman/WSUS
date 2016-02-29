@@ -17,30 +17,31 @@
 
     .PARAMETER Action
         What need to do with collection or its item:
-            Get - get metric from collection item
-            Count - count collection items
+            Discovery - Make Zabbix's LLD JSON;
+            Get - get metric from collection item;
+            Count - count collection items.
 
     .PARAMETER Object
         Define rule to make collection:
-            Info                    - WSUS informaton
-            Status                  - WSUS status (number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so)
-            Database                - WSUS database related info
-            Configuration           - WSUS configuration info
-            ComputerGroup           - Virtual object to taking computer group statistic
-            LastSynchronization     - Last Synchronization data
-            SynchronizationProcess  - Synchronization process status (haven't keys)
+            Info                    - WSUS informaton;
+            Status                  - WSUS status (number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so);
+            Database                - WSUS database related info;
+            Configuration           - WSUS configuration info;
+            ComputerGroup           - Virtual object to taking computer group statistic;
+            LastSynchronization     - Last Synchronization data;
+            SynchronizationProcess  - Synchronization process status (haven't keys).
 
     .PARAMETER Key
         Define "path" to collection item's metric 
 
         Virtual keys for 'ComputerGroup' object:
-            ComputerTargetsWithUpdateErrorsCount - Computers updated with errors 
-            ComputerTargetsNeedingUpdatesCount   - Partially updated computers
-            ComputersUpToDateCount               - Full updated computers
-            ComputerTargetsUnknownCount          - Computers without update information 
+            ComputerTargetsWithUpdateErrorsCount - Computers updated with errors;
+            ComputerTargetsNeedingUpdatesCount   - Partially updated computers;
+            ComputersUpToDateCount               - Full updated computers;
+            ComputerTargetsUnknownCount          - Computers without update information.
 
         Virtual keys for 'LastSynchronization' object:
-            NotSyncInDays                        - Now much days was not running Synchronization process;
+            NotSyncInDays                        - Now much days was not running Synchronization process.
 
     .PARAMETER Id
         Used to select only one item from collection
