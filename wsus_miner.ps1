@@ -6,10 +6,10 @@
         Return WSUS metrics values, count selected objects, make LLD-JSON for Zabbix
 
     .NOTES  
-        Version: 1.0.1
+        Version: 1.2.0
         Name: Microsoft's WSUS Miner
         Author: zbx.sadman@gmail.com
-        DateCreated: 28FEB2016
+        DateCreated: 16MAR2016
         Testing environment: Windows Server 2008R2 SP1, WSUS 3.0 SP2, Powershell 2.0
 
     .LINK  
@@ -78,56 +78,112 @@
 #>
 
 Param (
-        [Parameter(Mandatory = $True)] 
-        [string]$Action,
-        [Parameter(Mandatory = $True)]
-        [string]$Object,
-        [Parameter(Mandatory = $False)]
-        [string]$Key,
-        [Parameter(Mandatory = $False)]
-        [string]$Id,
-        [Parameter(Mandatory = $False)]
-        [string]$ConsoleCP,
-        [Parameter(Mandatory = $False)]
-        [switch]$DefaultConsoleWidth
-      )
+   [Parameter(Mandatory = $False)] 
+   [ValidateSet('Discovery', 'Get', 'Count')]
+   [string]$Action,
+   [Parameter(Mandatory = $False)]
+   [ValidateSet('Info', 'Status', 'Database', 'Configuration', 'ComputerGroup', 'LastSynchronization', 'SynchronizationProcess')]
+   [string]$Object,
+   [Parameter(Mandatory = $False)]
+   [string]$Key,
+   [Parameter(Mandatory = $False)]
+   [string]$Id,
+   [Parameter(Mandatory = $False)]
+   [String]$ErrorCode,
+   [Parameter(Mandatory = $False)]
+   [string]$ConsoleCP,
+   [Parameter(Mandatory = $False)]
+   [switch]$DefaultConsoleWidth
+)
+
+#Set-StrictMode –Version Latest
 
 # Set US locale to properly formatting float numbers while converting to string
 [System.Threading.Thread]::CurrentThread.CurrentCulture = "en-US"
 
 # Width of console to stop breaking JSON lines
-Set-Variable -Name "CONSOLE_WIDTH" -Value 255 -Option Constant -Scope Global
+Set-Variable -Name "CONSOLE_WIDTH" -Value 255 -Option Constant
 
 ####################################################################################################################################
 #
 #                                                  Function block
 #    
 ####################################################################################################################################
-
 #
-#  Select object with ID if its given or with Any ID in another case
+#  Select object with Property that equal Value if its given or with Any Property in another case
 #
-filter IDEqualOrAny($Id) { if (($_.Id -Eq $Id) -Or (!$Id)) { $_ } }
+Function PropertyEqualOrAny {
+   Param (
+      [Parameter(ValueFromPipeline = $True)] 
+      [PSObject]$InputObject,
+      [PSObject]$Property,
+      [PSObject]$Value
+   );
+   Process {
+      # Do something with all objects (non-pipelined input case)  
+      ForEach ($Object in $InputObject) { 
+         # IsNullorEmpty used because !$Value give a erong result with $Value = 0 (True).
+         # But 0 may be right ID  
+         If (($Object.$Property -Eq $Value) -Or ([string]::IsNullorEmpty($Value))) { $Object }
+      }
+   } 
+}
 
 #
 #  Prepare string to using with Zabbix 
 #
-Function Prepare-ToZabbix {
-  Param (
-     [Parameter(Mandatory = $true, ValueFromPipeline = $true)] 
-     [PSObject]$InObject
-  );
-  $InObject = ($InObject.ToString());
+Function PrepareTo-Zabbix {
+   Param (
+      [Parameter(ValueFromPipeline = $True)] 
+      [PSObject]$InputObject,
+      [String]$ErrorCode,
+      [Switch]$NoEscape,
+      [Switch]$JSONCompatible
+   );
+   Begin {
+      # Add here more symbols to escaping if you need
+      $EscapedSymbols = @('\', '"');
+      $UnixEpoch = Get-Date -Date "01/01/1970";
+   }
+   Process {
+      # Do something with all objects (non-pipelined input case)  
+      ForEach ($Object in $InputObject) { 
+         If ($Null -Eq $Object) {
+           # Put empty string or $ErrorCode to output  
+           If ($ErrorCode) { $ErrorCode } Else { "" }
+           Continue;
+         }
+         # Need add doublequote around string for other objects when JSON compatible output requested?
+         $DoQuote = $False;
+         Switch (($Object.GetType()).FullName) {
+            'System.String'   { $DoQuote = $True; }
+            'System.Guid'     { $DoQuote = $True; }
+            'System.Boolean'  { $Object = [int]$Object; }
+            'System.DateTime' { $Object = (New-TimeSpan -Start $UnixEpoch -End $Object).TotalSeconds; }
+         }
+         # Normalize String object
+         $Object = $Object.ToString().Trim();
+         
+         If (!$NoEscape) { 
+            ForEach ($Symbol in $EscapedSymbols) { 
+               $Object = $Object.Replace($Symbol, "\$Symbol");
+            }
+         }
 
-  $InObject = $InObject.Replace("`"", "\`"");
-
-  $InObject;
+         # Doublequote object if adherence to JSON standart requested
+         If ($JSONCompatible -And $DoQuote) { 
+            "`"$Object`"";
+         } else {
+            $Object;
+         }
+      }
+   }
 }
 
 #
 #  Convert incoming object's content to UTF-8
 #
-function ConvertTo-Encoding ([string]$From, [string]$To){  
+Function ConvertTo-Encoding ([String]$From, [String]$To){  
    Begin   {  
       $encFrom = [System.Text.Encoding]::GetEncoding($from)  
       $encTo = [System.Text.Encoding]::GetEncoding($to)  
@@ -140,137 +196,90 @@ function ConvertTo-Encoding ([string]$From, [string]$To){
 }
 
 #
-#  Return value of object's metric defined by key-chain from $Keys Array
-#
-Function Get-Metric { 
-   Param (
-      [Parameter(Mandatory = $true, ValueFromPipeline = $true)] 
-      [PSObject]$InObject, 
-      [array]$Keys
-   ); 
-   # Expand all metrics related to keys contained in array step by step
-   $Keys | % { if ($_) { $InObject = $InObject | Select -Expand $_ }};
-   $InObject;
-}
-
-#
-#  Convert Windows DateTime to Unix timestamp and return its
-#
-Function ConvertTo-UnixTime { 
-   Param (
-      [Parameter(Mandatory = $true, ValueFromPipeline = $true)] 
-      [PSObject]$EndDate
-   ); 
-
-   Begin   { 
-      $StartDate = Get-Date -Date "01/01/1970"; 
-   }  
-
-   Process { 
-      # Return unix timestamp
-      (New-TimeSpan -Start $StartDate -End $EndDate).TotalSeconds; 
-   }  
-}
-
-
-#
 #  Make & return JSON, due PoSh 2.0 haven't Covert-ToJSON
 #
 Function Make-JSON {
    Param (
-      [Parameter(Mandatory = $true, ValueFromPipeline = $true)] 
-      [PSObject]$InObject, 
+      [Parameter(ValueFromPipeline = $True)] 
+      [PSObject]$InputObject, 
       [array]$ObjectProperties, 
-      [switch]$Pretty
+      [Switch]$Pretty
    ); 
    Begin   {
-               # Pretty json contain spaces, tabs and new-lines
-               if ($Pretty) { $CRLF = "`n"; $Tab = "    "; $Space = " "; } else {$CRLF = $Tab = $Space = "";}
-               # Init JSON-string $InObject
-               $Result += "{$CRLF$Space`"data`":[$CRLF";
-               # Take each Item from $InObject, get Properties that equal $ObjectProperties items and make JSON from its
-               $itFirstObject = $True;
-           } 
+      [String]$Result = "";
+      # Pretty json contain spaces, tabs and new-lines
+      If ($Pretty) { $CRLF = "`n"; $Tab = "    "; $Space = " "; } Else { $CRLF = $Tab = $Space = ""; }
+      # Init JSON-string $InObject
+      $Result += "{$CRLF$Space`"data`":[$CRLF";
+      # Take each Item from $InObject, get Properties that equal $ObjectProperties items and make JSON from its
+      $itFirstObject = $True;
+   } 
    Process {
-               ForEach ($Object in $InObject) {
-                  if (-Not $itFirstObject) { $Result += ",$CRLF"; }
-                  $itFirstObject=$False;
-                  $Result += "$Tab$Tab{$Space"; 
-                  $itFirstProperty = $True;
-                  # Process properties. No comma printed after last item
-                  ForEach ($Property in $ObjectProperties) {
-                     if (-Not $itFirstProperty) { $Result += ",$Space" }
-                     $itFirstProperty = $False;
-                     $Result += "`"{#$Property}`":$Space`"$($Object.$Property | Prepare-ToZabbix)`""
-                  }
-                  # No comma printed after last string
-                  $Result += "$Space}";
-               }
-           }
-  End      {
-               # Finalize and return JSON
-               "$Result$CRLF$Tab]$CRLF}";
-           }
+      # Do something with all objects (non-pipelined input case)  
+      ForEach ($Object in $InputObject) {
+         # Skip object when its $Null
+         If ($Null -Eq $Object) { Continue; }
+
+         If (-Not $itFirstObject) { $Result += ",$CRLF"; }
+         $itFirstObject=$False;
+         $Result += "$Tab$Tab{$Space"; 
+         $itFirstProperty = $True;
+         # Process properties. No comma printed after last item
+         ForEach ($Property in $ObjectProperties) {
+            If (-Not $itFirstProperty) { $Result += ",$Space" }
+            $itFirstProperty = $False;
+            $Result += "`"{#$Property}`":$Space$(PrepareTo-Zabbix -InputObject $Object.$Property -JSONCompatible)";
+         }
+         # No comma printed after last string
+         $Result += "$Space}";
+      }
+   }
+   End {
+      # Finalize and return JSON
+      "$Result$CRLF$Tab]$CRLF}";
+   }
 }
 
 #
-#  Return collection of GetComputerTargetGroups (all or selected by ID) or GetTotalSummaryPerComputerTarget (full or shrinked with condition)
+#  Return value of object's metric defined by key-chain from $Keys Array
 #
-Function Get-WSUSComputerTargetGroupInfo  { 
+Function Get-Metric { 
    Param (
-      [Parameter(Mandatory = $true, ValueFromPipeline = $true)] 
-      [PSObject]$WSUS, 
-      [string]$Action,
-      [string]$Key,
-      [string]$Id
+      [Parameter(ValueFromPipeline = $True)] 
+      [PSObject]$InputObject, 
+      [Array]$Keys
    ); 
-
-   Write-Verbose "$(Get-Date) [Get-WSUSComputerTargetGroupInfo] Retrieving target groups(s)"
-   # Take all computer Groups with specific or Any ID
-   $ComputerTargetGroups = $WSUS.GetComputerTargetGroups() | IDEqualOrAny $Id;
-   If (-Not $ComputerTargetGroups) {
-      Write-Error "Group with ID = '$Id' does not exist in WSUS!";
-      Exit;
-   }
-
-   if ('Discovery' -eq $Action) {
-      Write-Verbose "$(Get-Date) [Get-WSUSComputerTargetGroupInfo] Returning GetComputerTargetGroups collection"
-      # Return all computer Groups 
-      $ComputerTargetGroups;
-   } else {
-      Write-Verbose "$(Get-Date) [Get-WSUSComputerTargetGroupInfo] Taking group's GetTotalSummaryPerComputerTarget collection"
-      # If no ID given - change local $Key value to any for calling switch's default section
-      $ComputerTargets = $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() };
-      # Analyzing Key and count how much computers present into collection from selection 
-      Write-Verbose "$(Get-Date) [Get-WSUSComputerTargetGroupInfo] Filtering and return collection..."
-      switch ($Key) {
-         'ComputerTarget' {
-             # Include all computers
-             $ComputerTargets;
-         }               
-         'ComputerTargetsWithUpdateErrors' {
-             # $ComputerTargets | Where { $_.FailedCount -gt 0 };
-             # Include all failed (property FailedCount <> 0) computers
-             $ComputerTargets | Where { 0 -ne $_.FailedCount };
-         }                                                                                                                                       
-         'ComputerTargetsNeedingUpdates' {
-             #$ComputerTargets | Where { ($_.NotInstalledCount -gt 0 -Or $_.DownloadedCount -gt 0 -Or $_.InstalledPendingRebootCount -gt 0) -And $_.FailedCount -le 0}; 
-             # Include no failed, but not installed, downloaded, pending reboot computers
-             $ComputerTargets | Where { (0 -eq $_.FailedCount) -And (0 -ne ($_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount)) };
-         }                                                         
-         'ComputersUpToDate' {
-#             $ComputerTargets | Where { $_.UnknownCount -eq 0 -And $_.NotInstalledCount -eq 0 -And $_.DownloadedCount -le 0 -And $_.InstalledPendingRebootCount -le 0 -And $_.FailedCount -le 0 };
-             # include only no failed, unknown, not installed, downloaded, pending reboot
-             $ComputerTargets | Where { 0 -eq ($_.FailedCount+$_.UnknownCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount) };
-         }                    
-         'ComputerTargetsUnknown' {
-             #$ComputerTargets | Where { $_.UnknownCount -gt 0 -And $_.NotInstalledCount -le 0 -And $_.DownloadedCount -le 0 -And $_.InstalledPendingRebootCount -le 0 -And $_.FailedCount -le 0 };
-             # include only unknown, but no failed, not installed, downloaded, pending reboot
-             $ComputerTargets | Where { (0 -ne $_.UnknownCount) -And (0 -eq ($_.FailedCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))};
-         }
-         default { $False; }
+   Process {
+      # Do something with all objects (non-pipelined input case)  
+      ForEach ($Object in $InputObject) { 
+        If ($Null -Eq $Object) { Continue; }
+        # Expand all metrics related to keys contained in array step by step
+        ForEach ($Key in $Keys) {              
+           If ($Key) {
+              $Object = Select-Object -InputObject $Object -ExpandProperty $Key -ErrorAction SilentlyContinue;
+              If ($Error) { Break; }
+           }
+        }
+        $Object;
       }
    }
+}
+
+#
+#  Exit with specified ErrorCode or Warning message
+#
+Function Exit-WithMessage { 
+   Param (
+      [Parameter(Mandatory = $True, ValueFromPipeline = $True)] 
+      [String]$Message, 
+      [String]$ErrorCode 
+   ); 
+   If ($ErrorCode) { 
+      $ErrorCode;
+   } Else {
+      Write-Warning ($Message);
+   }
+   Exit;
 }
 
 ####################################################################################################################################
@@ -278,90 +287,112 @@ Function Get-WSUSComputerTargetGroupInfo  {
 #                                                 Main code block
 #    
 ####################################################################################################################################
-Write-Verbose "$(Get-Date) Loading 'Microsoft.UpdateServices.Administration' Assembly"
-[reflection.assembly]::LoadWithPartialName("Microsoft.UpdateServices.Administration") | Out-Null
+Write-Verbose "$(Get-Date) Loading 'Microsoft.UpdateServices.Administration' assembly"
+If (-Not (Get-Module -List -Name UpdateServices)) {
+   Try {
+      Add-Type -Path "$Env:ProgramFiles\Update Services\Api\Microsoft.UpdateServices.Administration.dll";
+   } Catch {
+      Throw ("Missing the required assemblies to use the WSUS API from {0}" -f "$Env:ProgramFiles\Update Services\Api")
+   }
+}
+
 Write-Verbose "$(Get-Date) Trying to connect to local WSUS Server"
 # connect on Local WSUS
 $WSUS = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
-if (!$WSUS)
-   {
-     Write-Warning "$(Get-Date) Connection failed";
-     Exit;
-   }
+If ($Null -Eq $WSUS) {
+   Exit-WithMessage -Message "Connection failed" -ErrorCode $ErrorCode;
+}
 Write-Verbose "$(Get-Date) Connection established";
 
-# if needProcess is False - $Result is not need to convert to string and etc 
-$doAction = $True;
-# split 
-$Keys = $Key.split(".");
+# split key to subkeys
+$Keys = $Key.Split(".");
 
 Write-Verbose "$(Get-Date) Creating collection of specified object: '$Object'";
 switch ($Object) {
-   'Info'                   { $Objects = $WSUS; }
-   'Status'                 { $Objects = $WSUS.GetStatus(); }
-   'Database'               { $Objects = $WSUS.GetDatabaseConfiguration(); }
-   'Configuration'          { $Objects = $WSUS.GetConfiguration(); }
-                              # $Key variable need here, not $Keys array
-   'ComputerGroup'          { $Objects = $WSUS | Get-WSUSComputerTargetGroupInfo -Action $Action -Key $key -Id $Id; }
-                              # | Select-Object make copy which used for properly Add-Member work
-   'LastSynchronization'    { $Objects = ($WSUS.GetSubscription()).GetLastSynchronizationInfo() | Select-Object;
-                              # Just add new Property for Virtual key "NotSyncInDays"
-                              $Objects | % { $_ | Add-Member -MemberType NoteProperty -Name "NotSyncInDays" -Value (New-TimeSpan -Start $_.StartTime.DateTime -End (Get-Date)).Days }
-                            }
-                              # SynchronizationStatus contain one value
-   'SynchronizationProcess' { $doAction = $False; $Result = ($WSUS.GetSubscription()).GetSynchronizationStatus(); }
-   default                  { 
-                              Write-Error "Unknown object: '$Object'";
-                              Exit;
-                            }
+   'Info' { 
+      $Objects = $WSUS; 
+   }
+   'Status' {
+      $Objects = $WSUS.GetStatus(); 
+   }
+   'Database' { 
+      $Objects = $WSUS.GetDatabaseConfiguration(); 
+   }
+   'Configuration' { 
+      $Objects = $WSUS.GetConfiguration(); 
+   }
+   'ComputerGroup' {
+      $Objects = PropertyEqualOrAny -InputObject $WSUS.GetComputerTargetGroups() -Property ID -Value $Id;
+      Switch ($Key) {
+         'ComputerTarget' {
+             # Include all computers
+             # Sort -Unique ?
+             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } ;
+         }
+         'ComputerTargetsWithUpdateErrors' {
+             # Include all failed (property FailedCount <> 0) computers
+             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
+                Where { 0 -ne $_.FailedCount } ;
+         }                                                                                                                                       
+         'ComputerTargetsNeedingUpdates' {
+             # Include no failed, but not installed, downloaded, pending reboot computers
+             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
+                Where { (0 -eq $_.FailedCount) -And (0 -ne ($_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount)) };
+         }                                                         
+         'ComputersUpToDate' {
+             # include only no failed, unknown, not installed, downloaded, pending reboot
+             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
+                Where { 0 -eq ($_.FailedCount+$_.UnknownCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount) };
+         }                    
+         'ComputerTargetsUnknown' {
+             # include only unknown, but no failed, not installed, downloaded, pending reboot
+             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
+                Where { (0 -ne $_.UnknownCount) -And (0 -eq ($_.FailedCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))};
+         }
+      }
+   }
+   'LastSynchronization' { 
+       # | Select-Object make copy which used for properly Add-Member work
+       $Objects = $WSUS.GetSubscription().GetLastSynchronizationInfo() | Select-Object;
+       # Just add new Property for Virtual key "NotSyncInDays"
+       $Objects | % { $_ | Add-Member -MemberType NoteProperty -Name "NotSyncInDays" -Value (New-TimeSpan -Start $_.StartTime.DateTime -End (Get-Date)).Days }
+   }
+   'SynchronizationProcess' { 
+       # SynchronizationStatus contain one value
+       $Objects = New-Object PSObject -Property @{"Status" = $WSUS.GetSubscription().GetSynchronizationStatus()};
+   }
 }  
 
-Write-Verbose "$(Get-Date) Collection created";
-#$Objects 
-
-if ($doAction) { 
-   Write-Verbose "$(Get-Date) Processing collection with action: '$Action'";
-   switch ($Action) {
-      # Discovery given object, make json for zabbix
-      'Discovery' {
-          switch ($Object) {
-             'ComputerGroup' { $ObjectProperties = @("NAME", "ID"); }
-          }
-          Write-Verbose "$(Get-Date) Generating LLD JSON";
-          $Result = $Objects | Make-JSON -ObjectProperties $ObjectProperties -Pretty;
+Write-Verbose "$(Get-Date) Collection created, begin processing its with action: '$Action'";
+switch ($Action) {
+   # Discovery given object, make json for zabbix
+   'Discovery' {
+       switch ($Object) {
+          'ComputerGroup' { $ObjectProperties = @("NAME", "ID"); }
+       }
+       Write-Verbose "$(Get-Date) Generating LLD JSON";
+       $Result =  Make-JSON -InputObject $Objects -ObjectProperties $ObjectProperties -Pretty;
+   }
+   # Get metrics or metric list
+   'Get' {
+      If ($Null -Eq $Objects) {
+         Exit-WithMessage -Message "No objects in collection" -ErrorCode $ErrorCode;
       }
-      # Get metrics or metric list
-      'Get' {
-         if ($Keys) { 
-            Write-Verbose "$(Get-Date) Getting metric related to key: '$Key'";
-            $Result = $Objects | Get-Metric -Keys $Keys;
-         } else { 
-            Write-Verbose "$(Get-Date) Getting metric list due metric's Key not specified";
-            $Result = $Objects | fl *;
-        };
-      }
-      # Count selected objects
-      'Count' { 
-          Write-Verbose "$(Get-Date) Counting objects";  
-          # if result not null, False or 0 - return .Count
-          $Result = $(if ($Objects) { @($Objects).Count } else { 0 } ); 
-      }
-      default  { 
-          Write-Error "Unknown action: '$Action'";
-          Exit;
-      }
-   }  
-}
-
-Write-Verbose "$(Get-Date) Converting Windows DataTypes to equal Unix's / Zabbix's";
-switch (($Result.GetType()).Name) {
-   'Boolean'  { $Result = [int]$Result; }
-   'DateTime' { $Result = $Result | ConvertTo-UnixTime; }
-   'Object[]' { $Result = $Result | Out-String; }
-}
-
-# Normalize String object
-$Result = $Result.ToString().Trim();
+      If ($Keys) { 
+         Write-Verbose "$(Get-Date) Getting metric related to key: '$Key'";
+         $Result = PrepareTo-Zabbix -InputObject (Get-Metric -InputObject $Objects -Keys $Keys) -ErrorCode $ErrorCode;
+      } Else { 
+         Write-Verbose "$(Get-Date) Getting metric list due metric's Key not specified";
+         $Result = Out-String -InputObject $Objects;
+      };
+   }
+   # Count selected objects
+   'Count' { 
+       Write-Verbose "$(Get-Date) Counting objects";  
+       # if result not null, False or 0 - return .Count
+       $Result = $(if ($Objects) { @($Objects).Count } else { 0 } ); 
+   }
+}  
 
 # Convert string to UTF-8 if need (For Zabbix LLD-JSON with Cyrillic chars for example)
 if ($consoleCP) { 
@@ -377,4 +408,4 @@ if (!$defaultConsoleWidth) {
 
 Write-Verbose "$(Get-Date) Finishing";
 
-"$Result";
+$Result;
