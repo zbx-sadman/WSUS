@@ -12,15 +12,15 @@ Support objects:
 - _Configuration_          - WSUS configuration info;
 - _ComputerGroup_          - Virtual object to taking computer group statistic;
 - _LastSynchronization_    - Last Synchronization data;
-- _SynchronizationProcess_ - Synchronization process status (haven't keys).
+- _SynchronizationProcess_ - Synchronization process info.
 
 Actions:
 - _Discovery_ - Make Zabbix's LLD JSON;
 - _Get_       - Get object metric's value;
-- _Count_     - Take number of objects in collection (selected with _ComputersUpToDate_ key, for example).
+- _Count_     - Take number of objects in collection (selected with _ComputerGroup's_ _ComputersUpToDate_ virtual key, for example).
 
 Zabbix's LLD available to:
-- _ComputerGroup_ 
+- _ComputerGroup_.
 
 Virtual keys for _ComputerGroup_ object is:
 - _ComputerTargetsWithUpdateErrors_ - Computers updated with errors;
@@ -29,7 +29,10 @@ Virtual keys for _ComputerGroup_ object is:
 - _ComputerTargetsUnknown_          - Computers without update information.
 
 Virtual keys for _LastSynchronization_ object is:
-- _NotSyncInDays_ - Now much days was not running Synchronization process.
+- _NotSyncInDays_                   - Now much days was not running Synchronization process.
+
+Virtual keys for _SynchronizationProcess_ object:
+- _Status_                          - Synchronization process status
 
 ###How to use standalone
 
