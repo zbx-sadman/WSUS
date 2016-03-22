@@ -6,11 +6,12 @@
         Return WSUS metrics values, count selected objects, make LLD-JSON for Zabbix
 
     .NOTES  
-        Version: 1.2.0
+        Version: 1.3.0
         Name: Microsoft's WSUS Miner
         Author: zbx.sadman@gmail.com
-        DateCreated: 16MAR2016
+        DateCreated: 22MAR2016
         Testing environment: Windows Server 2008R2 SP1, WSUS 3.0 SP2, Powershell 2.0
+        Short test on: Windows Server 2012R2 
 
     .LINK  
         https://github.com/zbx-sadman
@@ -21,7 +22,7 @@
             Get - get metric from collection item
             Count - count collection items
 
-    .PARAMETER Object
+    .PARAMETER ObjectType
         Define rule to make collection:
             Info                    - WSUS informaton
             Status                  - WSUS status (number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so)
@@ -56,21 +57,21 @@
         Enable verbose messages
 
     .EXAMPLE 
-        wsus_miner.ps1 -Action "Discovery" -Object "ComputerGroup" -ConsoleCP CP866
+        wsus_miner.ps1 -Action "Discovery" -ObjectType "ComputerGroup" -ConsoleCP CP866
 
         Description
         -----------  
         Make Zabbix's LLD JSON for object "ComputerGroup". Output converted from CP866 to UTF-8.
 
     .EXAMPLE 
-        wsus_miner.ps1 -Action "Count" -Object "ComputerGroup" -Key "ComputerTargetsNeedingUpdatesCount" -Id "020a3aa4-c231-4ffa-a2ff-ff4cc2e95ad0" -defaultConsoleWidth
+        wsus_miner.ps1 -Action "Count" -ObjectType "ComputerGroup" -Key "ComputerTargetsNeedingUpdatesCount" -Id "020a3aa4-c231-4ffa-a2ff-ff4cc2e95ad0" -defaultConsoleWidth
 
         Description
         -----------  
         Return number of computers that needing updates places in group with id "020a3aa4-c231-4ffa-a2ff-ff4cc2e95ad0"
 
     .EXAMPLE 
-        wsus_miner.ps1 -Action "Get" -Object "Status" -defaultConsoleWidth -Verbose
+        wsus_miner.ps1 -Action "Get" -ObjectType "Status" -defaultConsoleWidth -Verbose
 
         Description
         -----------  
@@ -83,7 +84,8 @@ Param (
    [string]$Action,
    [Parameter(Mandatory = $False)]
    [ValidateSet('Info', 'Status', 'Database', 'Configuration', 'ComputerGroup', 'LastSynchronization', 'SynchronizationProcess')]
-   [string]$Object,
+   [Alias('Object')]
+   [string]$ObjectType,
    [Parameter(Mandatory = $False)]
    [string]$Key,
    [Parameter(Mandatory = $False)]
@@ -156,13 +158,12 @@ Function PrepareTo-Zabbix {
          # Need add doublequote around string for other objects when JSON compatible output requested?
          $DoQuote = $False;
          Switch (($Object.GetType()).FullName) {
-            'System.String'   { $DoQuote = $True; }
-            'System.Guid'     { $DoQuote = $True; }
             'System.Boolean'  { $Object = [int]$Object; }
             'System.DateTime' { $Object = (New-TimeSpan -Start $UnixEpoch -End $Object).TotalSeconds; }
+            Default           { $DoQuote = $True; }
          }
          # Normalize String object
-         $Object = $Object.ToString().Trim();
+         $Object = $( If ($JSONCompatible) { $Object.ToString() } else { $Object | Out-String }).Trim();
          
          If (!$NoEscape) { 
             ForEach ($Symbol in $EscapedSymbols) { 
@@ -287,18 +288,31 @@ Function Exit-WithMessage {
 #                                                 Main code block
 #    
 ####################################################################################################################################
-Write-Verbose "$(Get-Date) Loading 'Microsoft.UpdateServices.Administration' assembly"
-If (-Not (Get-Module -List -Name UpdateServices)) {
+
+# May be use WSUS 6.3 cmdlets?
+$UseNativeCmdLets = $True;
+# UpdateServices module is loaded from C:\Windows\System32\WindowsPowerShell\v1.0\Modules\UpdateServices\? (WSUS 6.x on Windows Server 2012)
+Write-Verbose "$(Get-Date) Test 'UpdateServices' module state"
+If (-Not (Get-Module -List -Name UpdateServices -Verbose:$False)) {
+   # No loaded PowerShell module found
+   # May be run with WSUS 3.0? Try to load assembly from file
+   Write-Verbose "$(Get-Date) Loading 'Microsoft.UpdateServices.Administration' assembly from file"
    Try {
       Add-Type -Path "$Env:ProgramFiles\Update Services\Api\Microsoft.UpdateServices.Administration.dll";
    } Catch {
-      Throw ("Missing the required assemblies to use the WSUS API from {0}" -f "$Env:ProgramFiles\Update Services\Api")
+      Throw ("Error loading the required assemblies to use the WSUS API from {0}" -f "$Env:ProgramFiles\Update Services\Api")
    }
+   $UseNativeCmdLets = $False;
 }
 
 Write-Verbose "$(Get-Date) Trying to connect to local WSUS Server"
-# connect on Local WSUS
-$WSUS = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
+$WSUS = $( if ($UseNativeCmdLets) {
+              Get-WsusServer;
+           } else {
+              $WSUS = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
+           }
+);
+
 If ($Null -Eq $WSUS) {
    Exit-WithMessage -Message "Connection failed" -ErrorCode $ErrorCode;
 }
@@ -307,8 +321,8 @@ Write-Verbose "$(Get-Date) Connection established";
 # split key to subkeys
 $Keys = $Key.Split(".");
 
-Write-Verbose "$(Get-Date) Creating collection of specified object: '$Object'";
-switch ($Object) {
+Write-Verbose "$(Get-Date) Creating collection of specified object: '$ObjectType'";
+switch ($ObjectType) {
    'Info' { 
       $Objects = $WSUS; 
    }
@@ -355,7 +369,8 @@ switch ($Object) {
        # | Select-Object make copy which used for properly Add-Member work
        $Objects = $WSUS.GetSubscription().GetLastSynchronizationInfo() | Select-Object;
        # Just add new Property for Virtual key "NotSyncInDays"
-       $Objects | % { $_ | Add-Member -MemberType NoteProperty -Name "NotSyncInDays" -Value (New-TimeSpan -Start $_.StartTime.DateTime -End (Get-Date)).Days }
+#       $Objects | % { Add-Member -InputObject $_ -MemberType 'NoteProperty' -Name 'NotSyncInDays' -Value (New-TimeSpan -Start $_.StartTime.DateTime -End (Get-Date)).Days; }
+       Add-Member -InputObject $Objects -MemberType 'NoteProperty' -Name 'NotSyncInDays' -Value (New-TimeSpan -Start $Objects.StartTime.DateTime -End (Get-Date)).Days;
    }
    'SynchronizationProcess' { 
        # SynchronizationStatus contain one value
@@ -367,7 +382,7 @@ Write-Verbose "$(Get-Date) Collection created, begin processing its with action:
 switch ($Action) {
    # Discovery given object, make json for zabbix
    'Discovery' {
-       switch ($Object) {
+       switch ($ObjectType) {
           'ComputerGroup' { $ObjectProperties = @("NAME", "ID"); }
        }
        Write-Verbose "$(Get-Date) Generating LLD JSON";
