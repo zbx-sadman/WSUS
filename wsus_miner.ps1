@@ -309,7 +309,7 @@ Write-Verbose "$(Get-Date) Trying to connect to local WSUS Server"
 $WSUS = $( if ($UseNativeCmdLets) {
               Get-WsusServer;
            } else {
-              $WSUS = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
+              [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
            }
 );
 
@@ -324,7 +324,8 @@ $Keys = $Key.Split(".");
 Write-Verbose "$(Get-Date) Creating collection of specified object: '$ObjectType'";
 switch ($ObjectType) {
    'Info' { 
-      $Objects = $WSUS; 
+      $Objects = Select-Object -InputObject $WSUS -First 1; 
+      Add-Member -Force -InputObject $Objects -MemberType NoteProperty -Name "FullVersion" -Value $Objects.Version.ToString();
    }
    'Status' {
       $Objects = $WSUS.GetStatus(); 

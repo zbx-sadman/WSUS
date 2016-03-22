@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2016-02-29T08:30:02Z</date>
+    <date>2016-03-22T13:37:52Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -9,14 +9,14 @@
     </groups>
     <templates>
         <template>
-            <template>Template App WSUS 3.0</template>
-            <name>Template App WSUS 3.0</name>
+            <template>Template App Microsoft WSUS</template>
+            <name>Template App Microsoft WSUS</name>
             <description>Template for Microsoft WSUS Server&#13;
 zbx.sadman@gmail.com&#13;
 &#13;
 https://github.com/zbx-sadman/WSUS&#13;
 &#13;
-Requirements: WSUS v3.0 and above, PowerShell v2.0 and above, wsus_miner.ps1 v1.0 and later</description>
+Requirements: WSUS v3 and above, PowerShell v2 and above, wsus_miner.ps1 v1 and later</description>
             <groups>
                 <group>
                     <name>Templates</name>
@@ -1094,7 +1094,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>wsus.miner[Get,Info,Version]</key>
+                    <key>wsus.miner[Get,Info,FullVersion]</key>
                     <delay>10800</delay>
                     <history>7</history>
                     <trends>365</trends>
@@ -1182,7 +1182,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <snmp_community/>
                     <snmp_oid/>
                     <key>wsus.miner[Discovery,ComputerGroup]</key>
-                    <delay>3600</delay>
+                    <delay>60</delay>
                     <status>0</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
@@ -1453,7 +1453,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputerTargetsWithUpdateErrors,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1465,7 +1465,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputerTargetsNeedingUpdates,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1477,7 +1477,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputersUpToDate,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1489,7 +1489,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputerTargetsUnknown,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1501,7 +1501,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputerTarget,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1533,7 +1533,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputerTargetsWithUpdateErrors,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1545,7 +1545,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputerTargetsNeedingUpdates,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1557,7 +1557,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputersUpToDate,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1569,7 +1569,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                                     <calc_fnc>4</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>Template App WSUS 3.0</host>
+                                        <host>Template App Microsoft WSUS</host>
                                         <key>wsus.miner[Count,ComputerGroup,ComputerTargetsUnknown,{#ID}]</key>
                                     </item>
                                 </graph_item>
@@ -1591,7 +1591,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
     </templates>
     <triggers>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,Status,ComputerTargetsNeedingUpdatesCount].last()}&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,Status,ComputerTargetsNeedingUpdatesCount].last()}&gt;0</expression>
             <name>A number of clients need updates ({ITEM.LASTVALUE1})</name>
             <url/>
             <status>0</status>
@@ -1601,7 +1601,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,Status,ComputerTargetsWithUpdateErrorsCount].last()}&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,Status,ComputerTargetsWithUpdateErrorsCount].last()}&gt;0</expression>
             <name>Clients with update errors is detected ({ITEM.LASTVALUE1})</name>
             <url/>
             <status>0</status>
@@ -1611,7 +1611,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:service_state[MSSQL$MICROSOFT##SSEE].last()}&lt;&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:service_state[MSSQL$MICROSOFT##SSEE].last()}&lt;&gt;0</expression>
             <name>Internal Database Service Not Running</name>
             <url/>
             <status>0</status>
@@ -1621,7 +1621,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,Status,CriticalOrSecurityUpdatesNotApprovedForInstallCount].last()}&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,Status,CriticalOrSecurityUpdatesNotApprovedForInstallCount].last()}&gt;0</expression>
             <name>Not approved critical or security updates is detected ({ITEM.LASTVALUE1})</name>
             <url/>
             <status>0</status>
@@ -1631,7 +1631,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,Status,WsusInfrastructureUpdatesNotApprovedForInstallCount].last()}&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,Status,WsusInfrastructureUpdatesNotApprovedForInstallCount].last()}&gt;0</expression>
             <name>Not approved WSUS Infrastructure updates is detected ({ITEM.LASTVALUE1})</name>
             <url/>
             <status>0</status>
@@ -1641,7 +1641,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:service_state[WsusService].last()}&lt;&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:service_state[WsusService].last()}&lt;&gt;0</expression>
             <name>Update Service Not Running</name>
             <url/>
             <status>0</status>
@@ -1651,7 +1651,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,Status,UpdatesWithClientErrorsCount].last()}&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,Status,UpdatesWithClientErrorsCount].last()}&gt;0</expression>
             <name>Updates with installation errors is detected ({ITEM.LASTVALUE1})</name>
             <url/>
             <status>0</status>
@@ -1661,7 +1661,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,Info,Version].diff()}&gt;0</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,Info,FullVersion].diff()}&gt;0</expression>
             <name>Version of WSUS Server was changed on {HOST.NAME}</name>
             <url/>
             <status>0</status>
@@ -1671,7 +1671,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,LastSynchronization,Result].str(&quot;Succeeded&quot;)}=0</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,LastSynchronization,Result].str(&quot;Succeeded&quot;)}=0</expression>
             <name>WSUS Server last synchronization is not succeeded</name>
             <url/>
             <status>0</status>
@@ -1681,7 +1681,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template App WSUS 3.0:wsus.miner[Get,LastSynchronization,NotSyncInDays].last()}&gt;{$NOTSYNCINDAYS_MAX}</expression>
+            <expression>{Template App Microsoft WSUS:wsus.miner[Get,LastSynchronization,NotSyncInDays].last()}&gt;{$NOTSYNCINDAYS_MAX}</expression>
             <name>WSUS Server synchronization is not held for more than {ITEM.LASTVALUE1} days</name>
             <url/>
             <status>0</status>
@@ -1718,7 +1718,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputerTargetsNeedingUpdatesCount]</key>
                     </item>
                 </graph_item>
@@ -1730,7 +1730,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputerTargetCount]</key>
                     </item>
                 </graph_item>
@@ -1742,7 +1742,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputersUpToDateCount]</key>
                     </item>
                 </graph_item>
@@ -1754,7 +1754,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputerTargetsWithUpdateErrorsCount]</key>
                     </item>
                 </graph_item>
@@ -1786,7 +1786,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputerTargetsNeedingUpdatesCount]</key>
                     </item>
                 </graph_item>
@@ -1798,7 +1798,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputersUpToDateCount]</key>
                     </item>
                 </graph_item>
@@ -1810,7 +1810,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputerTargetsWithUpdateErrorsCount]</key>
                     </item>
                 </graph_item>
@@ -1842,7 +1842,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,UpdatesUpToDateCount]</key>
                     </item>
                 </graph_item>
@@ -1854,7 +1854,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,DeclinedUpdateCount]</key>
                     </item>
                 </graph_item>
@@ -1866,7 +1866,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,NotApprovedUpdateCount]</key>
                     </item>
                 </graph_item>
@@ -1878,7 +1878,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,UpdatesNeededByComputersCount]</key>
                     </item>
                 </graph_item>
@@ -1890,7 +1890,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,CriticalOrSecurityUpdatesNotApprovedForInstallCount]</key>
                     </item>
                 </graph_item>
@@ -1902,7 +1902,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,UpdatesWithClientErrorsCount]</key>
                     </item>
                 </graph_item>
@@ -1934,7 +1934,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,UpdatesUpToDateCount]</key>
                     </item>
                 </graph_item>
@@ -1946,7 +1946,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,UpdatesNeededByComputersCount]</key>
                     </item>
                 </graph_item>
@@ -1958,7 +1958,7 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <calc_fnc>4</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>Template App WSUS 3.0</host>
+                        <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,UpdatesWithClientErrorsCount]</key>
                     </item>
                 </graph_item>
