@@ -1,9 +1,12 @@
 ## WSUS Miner 
 This is a little Powershell script that fetch metric's values from Microsoft WSUS 3.0 Server.
 
-Actual release 1.2.0
+Actual release 1.3.0
 
-Tested on Windows Server 2008 R2 SP1, WSUS 3.0 SP1, Powershell 2.0
+Tested on:
+- Production mode: Windows Server 2008 R2 SP1, WSUS 3.0 SP1, Powershell 2;
+- Non-production mode: Windows Server 2012 R2, WSUS 6, Powershell 4.
+
 
 Support objects:
 - _Info_                   - WSUS informaton;
@@ -49,13 +52,12 @@ Virtual keys for _SynchronizationProcess_ object:
     ..."wsus_miner.ps1" -Action "Count" -Object "ComputerGroup" -Key "ComputerTargetsWithUpdateErrors" -Id "e4b8b165-4e29-42ec-ac40-66178600ca9b"
 
 ###How to use with Zabbix
-1. Make setting to make unsigned .ps1 scripts executable for all time with _powershell.exe -command "Set-ExecutionPolicy RemoteSigned"_ or for once with _-ExecutionPolicy_ command line option;
-2. Just include [zbx\_wsus\_miner.conf](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates/zbx_wsus_miner.conf) to Zabbix Agent config;
-3. Put _wsus\_miner.ps1_ to _C:\zabbix\scripts_ dir; 
-4. Set Zabbix Agent's / Server's _Timeout_ to more that 3 sec (may be 10 or 30);
-5. Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
-6. Be sure that Zabbix Agent worked in Active mode - in template used 'Zabbix agent(active)' poller type. Otherwise - change its to 'Zabbix agent' and increase value of server's StartPollers parameter;
-7. Enjoy.
+1. Just include [zbx\_wsus\_miner.conf](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates/zbx_wsus_miner.conf) to Zabbix Agent config;
+2. Put _wsus\_miner.ps1_ to _C:\zabbix\scripts_ dir. If you want to place script to other directory, you must edit _wsus\_miner.ps1_ to properly set script's path; 
+3. Set Zabbix Agent's / Server's _Timeout_ to more that 3 sec (may be 10 or 30);
+4. Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
+5. Be sure that Zabbix Agent worked in Active mode - in template used 'Zabbix agent(active)' poller type. Otherwise - change its to 'Zabbix agent' and increase value of server's StartPollers parameter;
+6. Enjoy.
 
 **Note**
 Do not try import Zabbix v2.4 template to Zabbix _pre_ v2.4. You need to edit .xml file and make some changes at discovery_rule - filter tags area and change _#_ to _<>_ in trigger expressions. I will try to make template to old Zabbix.

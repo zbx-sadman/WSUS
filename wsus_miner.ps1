@@ -10,8 +10,8 @@
         Name: Microsoft's WSUS Miner
         Author: zbx.sadman@gmail.com
         DateCreated: 22MAR2016
-        Testing environment: Windows Server 2008R2 SP1, WSUS 3.0 SP2, Powershell 2.0
-        Short test on: Windows Server 2012R2 
+        Testing environment: Windows Server 2008R2 SP1, WSUS 3 SP2, Powershell 2
+        Non-production testing environment: Windows Server 2012 R2, WSUS 6, PowerShell 4
 
     .LINK  
         https://github.com/zbx-sadman
