@@ -43,17 +43,17 @@ Virtual keys for _SynchronizationProcess_ object:
     powershell -NoProfile -ExecutionPolicy "RemoteSigned" -File "wsus_miner.ps1" -Action "Get" -Object "Configuration" -Verbose
 
     # Make Zabbix's LLD JSON for 'ComputerGroup' object. Group names contains Russian Cyrillic symbols
-    ... "wsfc.ps1" -Action "Discovery" -Object "ComputerGroup" -consoleCP CP866
+    ... "wsus_miner.ps1" -Action "Discovery" -Object "ComputerGroup" -consoleCP CP866
 
     # Get number of days passed since the last synchronization
-    ... "wsfc.ps1" -Action "Get" -Object "LastSynchronization" -Key "NotSyncInDays"
+    ... "wsus_miner.ps1" -Action "Get" -Object "LastSynchronization" -Key "NotSyncInDays"
 
     # Get number of computers that have update errors and placed in ComputerGroup with ID=e4b8b165-4e29-42ec-ac40-66178600ca9b
     ..."wsus_miner.ps1" -Action "Count" -Object "ComputerGroup" -Key "ComputerTargetsWithUpdateErrors" -Id "e4b8b165-4e29-42ec-ac40-66178600ca9b"
 
 ###How to use with Zabbix
 1. Just include [zbx\_wsus\_miner.conf](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates/zbx_wsus_miner.conf) to Zabbix Agent config;
-2. Put _wsus\_miner.ps1_ to _C:\zabbix\scripts_ dir. If you want to place script to other directory, you must edit _wsus\_miner.ps1_ to properly set script's path; 
+2. Put _wsus\_miner.ps1_ to _C:\zabbix\scripts_ dir. If you want to place script to other directory, you must edit _zbx\_wsus\_miner.conf_ to properly set script's path; 
 3. Set Zabbix Agent's / Server's _Timeout_ to more that 3 sec (may be 10 or 30);
 4. Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
 5. Be sure that Zabbix Agent worked in Active mode - in template used 'Zabbix agent(active)' poller type. Otherwise - change its to 'Zabbix agent' and increase value of server's StartPollers parameter;
@@ -63,10 +63,9 @@ Virtual keys for _SynchronizationProcess_ object:
 Do not try import Zabbix v2.4 template to Zabbix _pre_ v2.4. You need to edit .xml file and make some changes at discovery_rule - filter tags area and change _#_ to _<>_ in trigger expressions. I will try to make template to old Zabbix.
 
 ###Hints
-- To see available metrics, run script without "-Key" option: _powershell -File C:\zabbix\scripts\wsus\_miner.ps1 -Action "Get" -Object "Status"_;
-- To measure script runtime use _Verbose_ command line switch;
-- To get on Zabbix Server side properly UTF-8 output when have non-english (for example Russian Cyrillic) symbols in Computer Group's names, use  _-consoleCP **your_native_codepage**_ command line option. For example to convert from Russian Cyrillic codepage (CP866): _...wsus\_miner.ps1 ... -consoleCP CP866_;
-- If u need additional symbol escaping in LLD JSON - just add one more calls of _$InObject = $InObject.Replace(...)_  in _Prepare-ToZabbix_ function;
+- To see available metrics, run script without "-Key" option: _... "wsus_miner.ps1" -Action "Get" -Object "Status"_;
+- To get on Zabbix Server side properly UTF-8 output when have non-english (for example Russian Cyrillic) symbols in Computer Group's names, use  _-consoleCP **your_native_codepage**_ command line option. For example to convert from Russian Cyrillic codepage (CP866): _... "wsus_miner.ps1"  ... -consoleCP CP866_;
+- If u need additional symbol escaping in LLD JSON - just add one or more symbols to _$EscapedSymbols_ array in _PrepareTo-Zabbix_ function;
 - Running the script with PowerShell 3 and above may be require to enable PowerShell 2 compatible mode;
 - To measure script runtime use _Verbose_ command line switch,
 
