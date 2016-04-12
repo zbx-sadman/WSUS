@@ -6,10 +6,10 @@
         Return WSUS metrics values, count selected objects, make LLD-JSON for Zabbix
 
     .NOTES  
-        Version: 1.3.0
+        Version: 1.3.1
         Name: Microsoft's WSUS Miner
         Author: zbx.sadman@gmail.com
-        DateCreated: 22MAR2016
+        DateCreated: 12APR2016
         Testing environment: Windows Server 2008R2 SP1, WSUS 3 SP2, Powershell 2
         Non-production testing environment: Windows Server 2012 R2, WSUS 6, PowerShell 4
 
@@ -46,6 +46,9 @@
 
     .PARAMETER Id
         Used to select only one item from collection
+
+    .PARAMETER ErrorCode
+        What must be returned if any process error will be reached
 
     .PARAMETER ConsoleCP
         Codepage of Windows console. Need to properly convert output to UTF-8
@@ -163,7 +166,7 @@ Function PrepareTo-Zabbix {
             Default           { $DoQuote = $True; }
          }
          # Normalize String object
-         $Object = $( If ($JSONCompatible) { $Object.ToString() } else { $Object | Out-String }).Trim();
+         $Object = $( If ($JSONCompatible) { $Object.ToString().Trim() } else { Out-String -InputObject (Format-List -InputObject $Object -Property *) });
          
          If (!$NoEscape) { 
             ForEach ($Symbol in $EscapedSymbols) { 
@@ -307,10 +310,10 @@ If (-Not (Get-Module -List -Name UpdateServices -Verbose:$False)) {
 
 Write-Verbose "$(Get-Date) Trying to connect to local WSUS Server"
 $WSUS = $( if ($UseNativeCmdLets) {
-              Get-WsusServer;
-           } else {
-              [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
-           }
+                 Get-WsusServer;
+              } else {
+                 [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
+              }
 );
 
 If ($Null -Eq $WSUS) {
@@ -322,93 +325,94 @@ Write-Verbose "$(Get-Date) Connection established";
 $Keys = $Key.Split(".");
 
 Write-Verbose "$(Get-Date) Creating collection of specified object: '$ObjectType'";
-switch ($ObjectType) {
-   'Info' { 
-      $Objects = Select-Object -InputObject $WSUS -First 1; 
-      Add-Member -Force -InputObject $Objects -MemberType NoteProperty -Name "FullVersion" -Value $Objects.Version.ToString();
-   }
-   'Status' {
-      $Objects = $WSUS.GetStatus(); 
-   }
-   'Database' { 
-      $Objects = $WSUS.GetDatabaseConfiguration(); 
-   }
-   'Configuration' { 
-      $Objects = $WSUS.GetConfiguration(); 
-   }
-   'ComputerGroup' {
-      $Objects = PropertyEqualOrAny -InputObject $WSUS.GetComputerTargetGroups() -Property ID -Value $Id;
-      Switch ($Key) {
-         'ComputerTarget' {
-             # Include all computers
-             # Sort -Unique ?
-             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } ;
-         }
-         'ComputerTargetsWithUpdateErrors' {
-             # Include all failed (property FailedCount <> 0) computers
-             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
-                Where { 0 -ne $_.FailedCount } ;
-         }                                                                                                                                       
-         'ComputerTargetsNeedingUpdates' {
-             # Include no failed, but not installed, downloaded, pending reboot computers
-             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
-                Where { (0 -eq $_.FailedCount) -And (0 -ne ($_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount)) };
-         }                                                         
-         'ComputersUpToDate' {
-             # include only no failed, unknown, not installed, downloaded, pending reboot
-             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
-                Where { 0 -eq ($_.FailedCount+$_.UnknownCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount) };
-         }                    
-         'ComputerTargetsUnknown' {
-             # include only unknown, but no failed, not installed, downloaded, pending reboot
-             $Objects = $Objects | % { $_.GetTotalSummaryPerComputerTarget() } |
-                Where { (0 -ne $_.UnknownCount) -And (0 -eq ($_.FailedCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))};
+$Objects =  $(
+   Switch ($ObjectType) {
+      'Info' { 
+         $WSUSObjectCopy = Select-Object -InputObject $WSUS -First 1; 
+         Add-Member -Force -InputObject $WSUSObjectCopy -MemberType NoteProperty -Name "FullVersion" -Value $WSUSObjectCopy.Version.ToString();
+         $WSUSObjectCopy;
+      }
+      'Status' {
+         $WSUS.GetStatus(); 
+      }
+      'Database' { 
+         $WSUS.GetDatabaseConfiguration(); 
+      }
+      'Configuration' { 
+         $WSUS.GetConfiguration(); 
+      }
+      'ComputerGroup' {
+         $ComputerTargetGroups = PropertyEqualOrAny -InputObject $WSUS.GetComputerTargetGroups() -Property ID -Value $Id;
+         Switch ($Key) {
+            'ComputerTarget' {
+                # Include all computers
+                # Sort -Unique ?
+                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } ;
+            }
+            'ComputerTargetsWithUpdateErrors' {
+                # Include all failed (property FailedCount <> 0) computers
+                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
+                   Where { 0 -ne $_.FailedCount } ;
+            }                                                                                                                                       
+            'ComputerTargetsNeedingUpdates' {
+                # Include no failed, but not installed, downloaded, pending reboot computers
+                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
+                   Where { (0 -eq $_.FailedCount) -And (0 -ne ($_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount)) };
+            }                                                         
+            'ComputersUpToDate' {
+                # include only no failed, unknown, not installed, downloaded, pending reboot
+                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
+                   Where { 0 -eq ($_.FailedCount+$_.UnknownCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount) };
+            }                    
+            'ComputerTargetsUnknown' {
+                # include only unknown, but no failed, not installed, downloaded, pending reboot
+                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
+                   Where { (0 -ne $_.UnknownCount) -And (0 -eq ($_.FailedCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))};
+            }
+            Default { $ComputerTargetGroups; }
          }
       }
-   }
-   'LastSynchronization' { 
-       # | Select-Object make copy which used for properly Add-Member work
-       $Objects = $WSUS.GetSubscription().GetLastSynchronizationInfo() | Select-Object;
-       # Just add new Property for Virtual key "NotSyncInDays"
-#       $Objects | % { Add-Member -InputObject $_ -MemberType 'NoteProperty' -Name 'NotSyncInDays' -Value (New-TimeSpan -Start $_.StartTime.DateTime -End (Get-Date)).Days; }
-       Add-Member -InputObject $Objects -MemberType 'NoteProperty' -Name 'NotSyncInDays' -Value (New-TimeSpan -Start $Objects.StartTime.DateTime -End (Get-Date)).Days;
-   }
-   'SynchronizationProcess' { 
-       # SynchronizationStatus contain one value
-       $Objects = New-Object PSObject -Property @{"Status" = $WSUS.GetSubscription().GetSynchronizationStatus()};
-   }
-}  
+      'LastSynchronization' { 
+          # | Select-Object make copy which used for properly Add-Member work
+          $LastSynchronizationInfo = $WSUS.GetSubscription().GetLastSynchronizationInfo() | Select-Object;
+          # Just add new Property for Virtual key "NotSyncInDays"
+          Add-Member -InputObject $LastSynchronizationInfo -MemberType 'NoteProperty' -Name 'NotSyncInDays' -Value (New-TimeSpan -Start $LastSynchronizationInfo.StartTime.DateTime -End (Get-Date)).Days;
+          $LastSynchronizationInfo;
+      }
+      'SynchronizationProcess' { 
+          # SynchronizationStatus contain one value
+         New-Object PSObject -Property @{"Status" = $WSUS.GetSubscription().GetSynchronizationStatus()};
+      }
+   }  
+);
 
 Write-Verbose "$(Get-Date) Collection created, begin processing its with action: '$Action'";
-switch ($Action) {
-   # Discovery given object, make json for zabbix
-   'Discovery' {
-       switch ($ObjectType) {
-          'ComputerGroup' { $ObjectProperties = @("NAME", "ID"); }
-       }
-       Write-Verbose "$(Get-Date) Generating LLD JSON";
-       $Result =  Make-JSON -InputObject $Objects -ObjectProperties $ObjectProperties -Pretty;
-   }
-   # Get metrics or metric list
-   'Get' {
-      If ($Null -Eq $Objects) {
-         Exit-WithMessage -Message "No objects in collection" -ErrorCode $ErrorCode;
+
+$Result = $(
+   # if no object in collection: 1) JSON must be empty; 2) 'Get' must be able to return ErrorCode
+   Switch ($Action) {
+      'Discovery' {
+         # Discovery given object, make json for zabbix
+         Switch ($ObjectType) {
+           'ComputerGroup' { $ObjectProperties = @("NAME", "ID"); }
+         }
+         Write-Verbose "$(Get-Date) Generating LLD JSON";
+         Make-JSON -InputObject $Objects -ObjectProperties $ObjectProperties -Pretty;
       }
-      If ($Keys) { 
+      'Get' {
+         # Get metrics or metric list
          Write-Verbose "$(Get-Date) Getting metric related to key: '$Key'";
-         $Result = PrepareTo-Zabbix -InputObject (Get-Metric -InputObject $Objects -Keys $Keys) -ErrorCode $ErrorCode;
-      } Else { 
-         Write-Verbose "$(Get-Date) Getting metric list due metric's Key not specified";
-         $Result = Out-String -InputObject $Objects;
-      };
+         PrepareTo-Zabbix -InputObject (Get-Metric -InputObject $Objects -Keys $Keys) -ErrorCode $ErrorCode;
+      }
+      'Count' { 
+         Write-Verbose "$(Get-Date) Counting objects";  
+         $Count = 0;
+         # ++ must be faster that .Count, due don't enumerate object list
+         ForEach ($Object in $Objects) { $Count++; }
+         $Count;
+      }
    }
-   # Count selected objects
-   'Count' { 
-       Write-Verbose "$(Get-Date) Counting objects";  
-       # if result not null, False or 0 - return .Count
-       $Result = $(if ($Objects) { @($Objects).Count } else { 0 } ); 
-   }
-}  
+);
 
 # Convert string to UTF-8 if need (For Zabbix LLD-JSON with Cyrillic chars for example)
 if ($consoleCP) { 
