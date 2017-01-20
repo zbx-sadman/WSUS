@@ -56,7 +56,7 @@ Virtual keys for _SynchronizationProcess_ object:
 2. Put _wsus\_miner.ps1_ to _C:\zabbix\scripts_ dir. If you want to place script to other directory, you must edit _zbx\_wsus\_miner.conf_ to properly set script's path; 
 3. Set Zabbix Agent's / Server's _Timeout_ to more that 3 sec (may be 10 or 30);
 4. Import [template](https://github.com/zbx-sadman/wsus_miner/tree/master/Zabbix_Templates) to Zabbix Server;
-5. Be sure that Zabbix Agent worked in Active mode - in template used 'Zabbix agent(active)' poller type. Otherwise - change its to 'Zabbix agent' and increase value of server's StartPollers parameter;
+5. Make sure that Zabbix Agent worked in Active mode - in template used 'Zabbix agent(active)' poller type. Otherwise - change its to 'Zabbix agent' and increase value of server's StartPollers parameter;
 6. Enjoy.
 
 **Note**
