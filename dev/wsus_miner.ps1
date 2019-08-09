@@ -6,11 +6,12 @@
         Return WSUS metrics values, count selected objects, make LLD-JSON for Zabbix
 
     .NOTES  
-        Version: 1.3.2
+        Version: 1.3.3
         Name: Microsoft's WSUS Miner
         Author: zbx.sadman@gmail.com
         DateCreated: 27JAN2016
         DateModified: 26FEB2018
+        DateModified: 09AUG2019
         Testing environment: Windows Server 2008R2 SP1, WSUS 3 SP2, Powershell 2
         Non-production testing environment: Windows Server 2012 R2, WSUS 6, PowerShell 4
 
@@ -24,7 +25,7 @@
             Count - count collection items
 
     .PARAMETER ObjectType
-        Define rule to make collection:
+        Specify "rule" to make collection:
             Info                    - WSUS informaton
             Status                  - WSUS status (number of Approved/Declined/Expired/etc updates, full/partially/unsuccess updated clients and so)
             Database                - WSUS database related info
@@ -34,7 +35,9 @@
             SynchronizationProcess  - Synchronization process status (haven't keys)
 
     .PARAMETER Key
-        Define "path" to collection item's metric 
+        Specify "path" to collection item's metric 
+
+        If virtual key ends with '*' part, JSON formatted object's properties will be returned.
 
         Virtual keys for 'ComputerGroup' object:
             ComputerTargetsWithUpdateErrorsCount - Computers updated with errors 
@@ -44,8 +47,11 @@
             ComputerTargetsNotReportedWithin     - Computers that have not been reported for several days
             ComputerTargetsNotUpdatedWithin      - Computers that did not report for several days
 
+        Note: Metrics will be contain object collection if ShowAsSystemObject switch used, and number of collection items otherwise
+
         Virtual keys for 'LastSynchronization' object:
             NotSyncInDays                        - Now much days was not running Synchronization process;
+ 
 
     .PARAMETER Value
         Key specific parameter:
@@ -65,6 +71,9 @@
     .PARAMETER DefaultConsoleWidth
         Say to leave default console width and not grow its to $CONSOLE_WIDTH
 
+    .PARAMETER ShowAsSystemObject
+        Metric's properties will be return as Formatted-List cmdlet result
+
     .PARAMETER Verbose
         Enable verbose messages
 
@@ -76,14 +85,18 @@
         Make Zabbix's LLD JSON for object "ComputerGroup". Output converted from CP866 to UTF-8.
 
     .EXAMPLE 
-        wsus_miner.ps1 -Action "Count" -ObjectType "ComputerGroup" -Key "ComputerTargetsNeedingUpdatesCount" -Id "020a3aa4-c231-4ffa-a2ff-ff4cc2e95ad0" -defaultConsoleWidth
+        wsus_miner.ps1 -Action "Count" -ObjectType "ComputerGroup" -Key "ComputerTargetsNeedingUpdatesCount" -Id "020a3aa4-c231-4ffa-a2ff-ff4cc2e95ad0" -defaultConsoleWidth -ShowAsSystemObject
+          OR
+        wsus_miner.ps1 -Action "Get" -ObjectType "ComputerGroup" -Key "ComputerTargetsNeedingUpdatesCount" -Id "020a3aa4-c231-4ffa-a2ff-ff4cc2e95ad0" -defaultConsoleWidth
 
         Description
         -----------  
         Return number of computers that needing updates places in group with id "020a3aa4-c231-4ffa-a2ff-ff4cc2e95ad0"
 
     .EXAMPLE 
-        wsus_miner.ps1 -Action "Get" -ObjectType "Status" -defaultConsoleWidth -Verbose
+        wsus_miner.ps1 -Action "Get" -ObjectType "Status" -defaultConsoleWidth -Verbose -ShowAsSystemObject
+          OR
+        wsus_miner.ps1 -Action "Get" -ObjectType "Status" -Key "*" -defaultConsoleWidth -Verbose
 
         Description
         -----------  
@@ -109,7 +122,9 @@ Param (
    [Parameter(Mandatory = $False)]
    [string]$ConsoleCP,
    [Parameter(Mandatory = $False)]
-   [switch]$DefaultConsoleWidth
+   [switch]$DefaultConsoleWidth,
+   [Parameter(Mandatory = $False)]
+   [switch]$ShowAsSystemObject
 )
 
 #Set-StrictMode –Version Latest
@@ -138,9 +153,9 @@ Function PropertyEqualOrAny {
    Process {
       # Do something with all objects (non-pipelined input case)  
       ForEach ($Object in $InputObject) { 
-         # IsNullorEmpty used because !$Value give a erong result with $Value = 0 (True).
+         # IsNullOrEmpty used because !$Value give a erong result with $Value = 0 (True).
          # But 0 may be right ID  
-         If (($Object.$Property -Eq $Value) -Or ([string]::IsNullorEmpty($Value))) { $Object }
+         If (($Object.$Property -Eq $Value) -Or ([string]::IsNullOrEmpty($Value))) { $Object }
       }
    } 
 }
@@ -154,44 +169,37 @@ Function PrepareTo-Zabbix {
       [PSObject]$InputObject,
       [String]$ErrorCode,
       [Switch]$NoEscape,
-      [Switch]$JSONCompatible
+      [Switch]$JSONCompatible,
+      [Switch]$ShowAsObject
    );
-   Begin {
-      # Add here more symbols to escaping if you need
-      $EscapedSymbols = @('\', '"');
-      $UnixEpoch = Get-Date -Date "01/01/1970";
-   }
-   Process {
-      # Do something with all objects (non-pipelined input case)  
-      ForEach ($Object in $InputObject) { 
-         If ($Null -Eq $Object) {
-           # Put empty string or $ErrorCode to output  
-           If ($ErrorCode) { $ErrorCode } Else { "" }
-           Continue;
-         }
-         # Need add doublequote around string for other objects when JSON compatible output requested?
-         $DoQuote = $False;
-         Switch (($Object.GetType()).FullName) {
-            'System.Boolean'  { $Object = [int]$Object; }
-            'System.DateTime' { $Object = (New-TimeSpan -Start $UnixEpoch -End $Object).TotalSeconds; }
-            Default           { $DoQuote = $True; }
-         }
-         # Normalize String object
-         $Object = $( If ($JSONCompatible) { $Object.ToString().Trim() } else { Out-String -InputObject (Format-List -InputObject $Object -Property *) });
-         
-         If (!$NoEscape) { 
-            ForEach ($Symbol in $EscapedSymbols) { 
-               $Object = $Object.Replace($Symbol, "\$Symbol");
-            }
-         }
+   # Add here more symbols to escaping if you need
+   $EscapedSymbols = @('\', '"');
+   $UnixEpoch = Get-Date -Date "01/01/1970";
 
-         # Doublequote object if adherence to JSON standart requested
-         If ($JSONCompatible -And $DoQuote) { 
-            "`"$Object`"";
-         } else {
-            $Object;
-         }
-      }
+   $Result = $Null;
+   # Need add doublequote around string for other objects when JSON compatible output requested?
+   $DoQuote = $False;
+
+   If ($Null -Eq $InputObject) { 
+      $Result = $(If ($ErrorCode) { $ErrorCode });
+   } Else {
+     Switch -Wildcard (($InputObject.GetType()).Name) {
+         'Int*'           { $Result = $InputObject;}
+         'Boolean'        { $Result = $(If ($InputObject) {"true"} Else {"false"}); }
+         'DateTime'       { $Result = (New-TimeSpan -Start $UnixEpoch -End $InputObject).TotalSeconds; }
+          Default         { $Result = $InputObject; $DoQuote = $True; }
+       }
+
+     # Normalize String object
+     $Result = $Result.ToString().Trim();             
+     If (!$NoEscape) { ForEach ($Symbol in $EscapedSymbols) { $Result = $Result.Replace($Symbol, "\$Symbol"); } }
+   }
+
+   # Doublequote object if adherence to JSON standart requested
+   If ($JSONCompatible -And $DoQuote) { 
+      "`"$Result`"";
+   } else {
+      $Result;
    }
 }
 
@@ -210,10 +218,7 @@ Function ConvertTo-Encoding ([String]$From, [String]$To){
    }  
 }
 
-#
-#  Make & return JSON, due PoSh 2.0 haven't Covert-ToJSON
-#
-Function Make-JSON {
+Function Make-LLD-JSON {
    Param (
       [Parameter(ValueFromPipeline = $True)] 
       [PSObject]$InputObject, 
@@ -222,12 +227,39 @@ Function Make-JSON {
    ); 
    Begin   {
       [String]$Result = "";
+      # Init JSON-string $InObject
+      $Result += "{`n `"data`":[`n";
+   } 
+   Process {
+      $Result += (Make-JSON -InputObject $InputObject -ObjectProperties $ObjectProperties -Pretty -LLDFormat);
+   }
+   End {
+      # Finalize and return JSON
+      "$Result`n    ]`n}";
+   }
+}
+
+
+#
+#  Make & return JSON, due PoSh 2.0 haven't Covert-ToJSON
+#
+Function Make-JSON {
+   Param (
+      [Parameter(ValueFromPipeline = $True)] 
+      [PSObject]$InputObject, 
+      [Array]$ObjectProperties, 
+      [Switch]$Pretty,
+      [Switch]$LLDFormat
+   ); 
+   Begin   {
+      [String]$Result = "";
       # Pretty json contain spaces, tabs and new-lines
       If ($Pretty) { $CRLF = "`n"; $Tab = "    "; $Space = " "; } Else { $CRLF = $Tab = $Space = ""; }
-      # Init JSON-string $InObject
-      $Result += "{$CRLF$Space`"data`":[$CRLF";
+      If ($LLDFormat) { $KeyPrefix = "{#"; $KeyPostfix = "}"; } Else { $KeyPrefix = $KeyPostfix = ""; }
+
       # Take each Item from $InObject, get Properties that equal $ObjectProperties items and make JSON from its
       $itFirstObject = $True;
+      If ($Null -Eq $ObjectProperties) { $ObjectProperties = @($InputObject.PSObject.Properties | Select-Object -Expand Name)}
    } 
    Process {
       # Do something with all objects (non-pipelined input case)  
@@ -237,30 +269,33 @@ Function Make-JSON {
 
          If (-Not $itFirstObject) { $Result += ",$CRLF"; }
          $itFirstObject=$False;
-         $Result += "$Tab$Tab{$Space"; 
+         $Result += $(If ($LLDFormat) {"$Tab$Tab"} )+"{$Space"; 
          $itFirstProperty = $True;
          # Process properties. No comma printed after last item
          ForEach ($Property in $ObjectProperties) {
-            If (-Not $itFirstProperty) { $Result += ",$Space" }
+            $Chunk = PrepareTo-Zabbix -InputObject $Object.$Property -JSONCompatible; 
+            if ($Null -Eq $Chunk) { Continue; }
+            If (-Not $itFirstProperty) { $Result += ","+$(If (-Not $LLDFormat) { "$CRLF$Tab" } Else { $Space }) }
             $itFirstProperty = $False;
-            $Result += "`"{#$Property}`":$Space$(PrepareTo-Zabbix -InputObject $Object.$Property -JSONCompatible)";
+            #Write-Host ($Object.$Property).GetType().Name;
+            $Result += "`"$KeyPrefix$Property$KeyPostfix`":$Chunk";
          }
          # No comma printed after last string
-         $Result += "$Space}";
+         $Result += $(If (-Not $LLDFormat) { "$CRLF" } Else { $Space }) + "}";
       }
    }
    End {
       # Finalize and return JSON
-      "$Result$CRLF$Tab]$CRLF}";
+      $Result;
    }
 }
 
 #
 #  Return value of object's metric defined by key-chain from $Keys Array
 #
-Function Get-Metric { 
+Function Get-Objects { 
    Param (
-      [Parameter(ValueFromPipeline = $True)] 
+      [Parameter(Mandatory = $False, ValueFromPipeline = $True)] 
       [PSObject]$InputObject, 
       [Array]$Keys
    ); 
@@ -270,14 +305,20 @@ Function Get-Metric {
         If ($Null -Eq $Object) { Continue; }
         # Expand all metrics related to keys contained in array step by step
         ForEach ($Key in $Keys) {              
+           If ("*" -Eq $Key) { Break; }
            If ($Key) {
               $Object = Select-Object -InputObject $Object -ExpandProperty $Key -ErrorAction SilentlyContinue;
               If ($Error) { Break; }
            }
         }
-        $Object;
+#        $Object;
       }
    }
+   End {
+      # Finalize and return JSON
+     $Object;
+   }
+
 }
 
 #
@@ -295,6 +336,24 @@ Function Exit-WithMessage {
       Write-Warning ($Message);
    }
    Exit;
+}
+
+Function Count-Collection { 
+   Param (
+      [Parameter(Mandatory = $False, ValueFromPipeline = $True)] 
+      [PSObject]$InputObject
+   ); 
+   Begin {
+      $Count = 0;
+   }
+   Process {
+     ForEach ($Object in $InputObject) {
+        If ($Null -Ne $Object) { $Count++; } 
+     }
+   }
+   End {
+      $Count;
+   }
 }
 
 ####################################################################################################################################
@@ -354,45 +413,53 @@ $Objects =  $(
       }
       'ComputerGroup' {
          $ComputerTargetGroups = PropertyEqualOrAny -InputObject $WSUS.GetComputerTargetGroups() -Property ID -Value $Id;
-         Switch ($Key) {
-            'ComputerTarget' {
-                # Include all computers
-                # Sort -Unique ?
-                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } ;
-            }
-            'ComputerTargetsWithUpdateErrors' {
-                # Include all failed (property FailedCount <> 0) computers
-                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
-                   Where { 0 -ne $_.FailedCount } ;
-            }                                                                                                                                       
-            'ComputerTargetsNeedingUpdates' {
-                # Include no failed, but not installed, downloaded, pending reboot computers
-                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
-                   Where { (0 -eq $_.FailedCount) -And (0 -ne ($_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount)) };
-            }                                                         
-            'ComputersUpToDate' {
-                # include only no failed, unknown, not installed, downloaded, pending reboot
-                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
-                   Where { 0 -eq ($_.FailedCount+$_.UnknownCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount) };
-            }                    
-            'ComputerTargetsUnknown' {
-                # include only unknown, but no failed, not installed, downloaded, pending reboot
-                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
-                   Where { (0 -ne $_.UnknownCount) -And (0 -eq ($_.FailedCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))};
-            }
-            'ComputerTargetsNotReportedWithin' {
-                $Today = Get-Date;
-                $ComputerTargetGroups | % { $_.GetComputerTargets() } | Sort-Object -Property Id -Unique | 
-#                      % { (New-TimeSpan -Start $_.LastReportedStatusTime -End $Today).Days }
-                   Where { (New-TimeSpan -Start $_.LastReportedStatusTime -End $Today).Days -gt $Value } 
-            }
-            'ComputerTargetsNotUpdatedWithin' {
-                $Today = Get-Date;
-                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
-                   Where { (New-TimeSpan -Start $_.LastUpdated -End $Today).Days -gt $Value }
-            }
-            Default { $ComputerTargetGroups; }
+         If ('Discovery'-Eq $Action) {
+           $ComputerTargetGroups
+         } Else {
+         $Today = Get-Date;
+         $ComputerTarget = $ComputerTargetsWithUpdateErrors = $ComputerTargetsNeedingUpdates = $ComputersUpToDate = $ComputerTargetsUnknown = $ComputerTargetsNotReportedWithin = $ComputerTargetsNotUpdatedWithin = @();
+         $ComputerTargetGroups | % { 
+           $TotalSummary = $_.GetTotalSummaryPerComputerTarget();
+           $TotalSummary | % {
+              #Write-Host $_;
+              $ComputerTarget += $_;
+              If (0 -ne $_.FailedCount) { $ComputerTargetsWithUpdateErrors += $_; } 
+              If ((0 -eq $_.FailedCount) -And (0 -ne ($_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))) { $ComputerTargetsNeedingUpdates += $_; } 
+              If (0 -eq ($_.FailedCount+$_.UnknownCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount)) { $ComputersUpToDate += $_; } 
+              If ((0 -ne $_.UnknownCount) -And (0 -eq ($_.FailedCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))) { $ComputerTargetsUnknown += $_; } 
+              #If ((New-TimeSpan -Start $_.LastUpdated -End $Today).Days -gt $Value) { $ComputerTargetsNotUpdatedWithin += $_; } 
+              #If ((New-TimeSpan -Start $_.LastReportedStatusTime -End $Today).Days -gt $Value) { $ComputerTargetsNotReportedWithin += $_; } 
+           }
+         };         
+
+         $ComputerTarget = $ComputerTarget | Group-Object 'ComputerTargetId' | %{ $_.Group | Select 'ComputerTargetId' -First 1} ;
+         $ComputerTargetsWithUpdateErrors = $ComputerTargetsWithUpdateErrors | Group-Object 'ComputerTargetId' | %{ $_.Group | Select 'ComputerTargetId' -First 1} ;
+         $ComputerTargetsNeedingUpdates = $ComputerTargetsNeedingUpdates | Group-Object 'ComputerTargetId' | %{ $_.Group | Select 'ComputerTargetId' -First 1} ;
+         $ComputersUpToDate = $ComputersUpToDate | Group-Object 'ComputerTargetId' | %{ $_.Group | Select 'ComputerTargetId' -First 1} ;
+         $ComputerTargetsUnknown = $ComputerTargetsUnknown | Group-Object 'ComputerTargetId' | %{ $_.Group | Select 'ComputerTargetId' -First 1} ;
+
+          If (-Not $ShowAsSystemObject) {
+            # Autocast to Int32
+            $ComputerTarget                   = $ComputerTarget | Count-Collection;
+            $ComputerTargetsWithUpdateErrors  = $ComputerTargetsWithUpdateErrors | Count-Collection;
+            $ComputerTargetsNeedingUpdates    = $ComputerTargetsNeedingUpdates | Count-Collection;
+            $ComputersUpToDate                = $ComputersUpToDate | Count-Collection;
+            $ComputerTargetsUnknown           = $ComputerTargetsUnknown | Count-Collection;
+            $ComputerTargetsNotReportedWithin = $ComputerTargetsNotReportedWithin | Count-Collection;
+            $ComputerTargetsNotUpdatedWithin  = $ComputerTargetsNotUpdatedWithin | Count-Collection;
          }
+
+        $ComputerTargetGroupsData = New-Object PSObject -Property @{"ComputerTarget" = $ComputerTarget;
+                                                                     "ComputerTargetsWithUpdateErrors" = $ComputerTargetsWithUpdateErrors;
+                                                                     "ComputerTargetsNeedingUpdates" = $ComputerTargetsNeedingUpdates;
+                                                                     "ComputersUpToDate" = $ComputersUpToDate;
+                                                                     "ComputerTargetsUnknown" = $ComputerTargetsUnknown;
+                                                                     "ComputerTargetsNotReportedWithin" = $ComputerTargetsNotReportedWithin;
+                                                                     "ComputerTargetsNotUpdatedWithin" = $ComputerTargetsNotUpdatedWithin
+         };
+         $ComputerTargetGroupsData;
+         }
+
       }
       'LastSynchronization' { 
           # | Select-Object make copy which used for properly Add-Member work
@@ -419,21 +486,25 @@ $Result = $(
            'ComputerGroup' { $ObjectProperties = @("NAME", "ID"); }
          }
          Write-Verbose "$(Get-Date) Generating LLD JSON";
-         Make-JSON -InputObject $Objects -ObjectProperties $ObjectProperties -Pretty;
+         Make-LLD-JSON -InputObject $Objects -ObjectProperties $ObjectProperties -Pretty;
       }
       'Get' {
          # Get metrics or metric list
          Write-Verbose "$(Get-Date) Getting metric related to key: '$Key'";
-         PrepareTo-Zabbix -InputObject (Get-Metric -InputObject $Objects -Keys $Keys) -ErrorCode $ErrorCode;
+         $Objects = Get-Objects -InputObject $Objects -Keys $Keys;
+         if ($ShowAsSystemObject) {
+            Out-String -InputObject (Format-List -InputObject $Objects -Property *)
+         } ElseIf ("*" -Eq $Keys[-1]) { 
+            Make-JSON -InputObject $Objects -Pretty;
+         } Else {
+            PrepareTo-Zabbix -InputObject $Objects -ErrorCode $ErrorCode;
+         }
       }
       'Count' { 
          Write-Verbose "$(Get-Date) Counting objects";  
          # ++ must be faster that .Count, due don't enumerate object list
-         $Count = 0;
-         ForEach ($Object in $Objects) {
-            If ($Null -Ne $Object) { $Count++; } 
-         }
-         $Count;
+         $Objects = Get-Objects -InputObject $Objects -Keys $Keys;
+         $Objects | Count-Collection;
       }
    }
 );

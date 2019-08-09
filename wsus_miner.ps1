@@ -6,10 +6,11 @@
         Return WSUS metrics values, count selected objects, make LLD-JSON for Zabbix
 
     .NOTES  
-        Version: 1.3.1
+        Version: 1.3.2
         Name: Microsoft's WSUS Miner
         Author: zbx.sadman@gmail.com
-        DateCreated: 12APR2016
+        DateCreated: 27JAN2016
+        DateModified: 26FEB2018
         Testing environment: Windows Server 2008R2 SP1, WSUS 3 SP2, Powershell 2
         Non-production testing environment: Windows Server 2012 R2, WSUS 6, PowerShell 4
 
@@ -40,9 +41,17 @@
             ComputerTargetsNeedingUpdatesCount   - Partially updated computers
             ComputersUpToDateCount               - Full updated computers
             ComputerTargetsUnknownCount          - Computers without update information 
+            ComputerTargetsNotReportedWithin     - Computers that have not been reported for several days
+            ComputerTargetsNotUpdatedWithin      - Computers that did not report for several days
 
         Virtual keys for 'LastSynchronization' object:
             NotSyncInDays                        - Now much days was not running Synchronization process;
+
+    .PARAMETER Value
+        Key specific parameter:
+            For 'ComputerTargetsNotReportedWithin' parameter - number of days
+            For 'ComputerTargetsNotUpdatedWithin'  parameter - number of days too.
+
 
     .PARAMETER Id
         Used to select only one item from collection
@@ -93,6 +102,8 @@ Param (
    [string]$Key,
    [Parameter(Mandatory = $False)]
    [string]$Id,
+   [Parameter(Mandatory = $False)]
+   [Int32]$Value,
    [Parameter(Mandatory = $False)]
    [String]$ErrorCode,
    [Parameter(Mandatory = $False)]
@@ -369,6 +380,17 @@ $Objects =  $(
                 $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
                    Where { (0 -ne $_.UnknownCount) -And (0 -eq ($_.FailedCount+$_.NotInstalledCount+$_.DownloadedCount+$_.InstalledPendingRebootCount))};
             }
+            'ComputerTargetsNotReportedWithin' {
+                $Today = Get-Date;
+                $ComputerTargetGroups | % { $_.GetComputerTargets() } | Sort-Object -Property Id -Unique | 
+#                      % { (New-TimeSpan -Start $_.LastReportedStatusTime -End $Today).Days }
+                   Where { (New-TimeSpan -Start $_.LastReportedStatusTime -End $Today).Days -gt $Value } 
+            }
+            'ComputerTargetsNotUpdatedWithin' {
+                $Today = Get-Date;
+                $ComputerTargetGroups | % { $_.GetTotalSummaryPerComputerTarget() } |
+                   Where { (New-TimeSpan -Start $_.LastUpdated -End $Today).Days -gt $Value }
+            }
             Default { $ComputerTargetGroups; }
          }
       }
@@ -406,9 +428,11 @@ $Result = $(
       }
       'Count' { 
          Write-Verbose "$(Get-Date) Counting objects";  
-         $Count = 0;
          # ++ must be faster that .Count, due don't enumerate object list
-         ForEach ($Object in $Objects) { $Count++; }
+         $Count = 0;
+         ForEach ($Object in $Objects) {
+            If ($Null -Ne $Object) { $Count++; } 
+         }
          $Count;
       }
    }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2016-03-22T13:37:52Z</date>
+    <date>2018-02-26T07:50:21Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -16,7 +16,7 @@ zbx.sadman@gmail.com&#13;
 &#13;
 https://github.com/zbx-sadman/WSUS&#13;
 &#13;
-Requirements: WSUS v3 and above, PowerShell v2 and above, wsus_miner.ps1 v1 and later</description>
+Requirements: WSUS v3 and above, PowerShell v2 and above, wsus_miner.ps1 v13,2 and later</description>
             <groups>
                 <group>
                     <name>Templates</name>
@@ -1046,6 +1046,92 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <logtimefmt/>
                 </item>
                 <item>
+                    <name>Number of сlients not updated within $5 days</name>
+                    <type>7</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>wsus.miner[Count,ComputerGroup,ComputerTargetsNotReportedWithin,,2]</key>
+                    <delay>600</delay>
+                    <history>7</history>
+                    <trends>90</trends>
+                    <status>0</status>
+                    <value_type>3</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <delta>0</delta>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description>Number of сlients that not reported within several days</description>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>WSUS Status</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                </item>
+                <item>
+                    <name>Number of сlients not updated within $5 days</name>
+                    <type>7</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>wsus.miner[Count,ComputerGroup,ComputerTargetsNotUpdatedWithin,,2]</key>
+                    <delay>600</delay>
+                    <history>7</history>
+                    <trends>90</trends>
+                    <status>0</status>
+                    <value_type>3</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <delta>0</delta>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description>Number of сlients that not updated within several days</description>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>WSUS Status</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                </item>
+                <item>
                     <name>Total number of updates</name>
                     <type>7</type>
                     <snmp_community/>
@@ -1735,18 +1821,6 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     </item>
                 </graph_item>
                 <graph_item>
-                    <sortorder>2</sortorder>
-                    <drawtype>0</drawtype>
-                    <color>00CC00</color>
-                    <yaxisside>0</yaxisside>
-                    <calc_fnc>4</calc_fnc>
-                    <type>0</type>
-                    <item>
-                        <host>Template App Microsoft WSUS</host>
-                        <key>wsus.miner[Get,Status,ComputersUpToDateCount]</key>
-                    </item>
-                </graph_item>
-                <graph_item>
                     <sortorder>0</sortorder>
                     <drawtype>0</drawtype>
                     <color>CC0000</color>
@@ -1756,6 +1830,18 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <item>
                         <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputerTargetsWithUpdateErrorsCount]</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <drawtype>0</drawtype>
+                    <color>00CC00</color>
+                    <yaxisside>0</yaxisside>
+                    <calc_fnc>4</calc_fnc>
+                    <type>0</type>
+                    <item>
+                        <host>Template App Microsoft WSUS</host>
+                        <key>wsus.miner[Get,Status,ComputersUpToDateCount]</key>
                     </item>
                 </graph_item>
             </graph_items>
@@ -1791,18 +1877,6 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     </item>
                 </graph_item>
                 <graph_item>
-                    <sortorder>2</sortorder>
-                    <drawtype>0</drawtype>
-                    <color>00CC00</color>
-                    <yaxisside>0</yaxisside>
-                    <calc_fnc>4</calc_fnc>
-                    <type>0</type>
-                    <item>
-                        <host>Template App Microsoft WSUS</host>
-                        <key>wsus.miner[Get,Status,ComputersUpToDateCount]</key>
-                    </item>
-                </graph_item>
-                <graph_item>
                     <sortorder>0</sortorder>
                     <drawtype>0</drawtype>
                     <color>CC0000</color>
@@ -1812,6 +1886,18 @@ Unknown	The synchronization process has ended for an unknown reason.</descriptio
                     <item>
                         <host>Template App Microsoft WSUS</host>
                         <key>wsus.miner[Get,Status,ComputerTargetsWithUpdateErrorsCount]</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <drawtype>0</drawtype>
+                    <color>00CC00</color>
+                    <yaxisside>0</yaxisside>
+                    <calc_fnc>4</calc_fnc>
+                    <type>0</type>
+                    <item>
+                        <host>Template App Microsoft WSUS</host>
+                        <key>wsus.miner[Get,Status,ComputersUpToDateCount]</key>
                     </item>
                 </graph_item>
             </graph_items>
