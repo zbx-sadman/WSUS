@@ -6,17 +6,27 @@
         Return WSUS metrics values, count selected objects, make LLD-JSON for Zabbix
 
     .NOTES  
-        Version: 1.3.3
+        Version: 1.3.4
         Name: Microsoft's WSUS Miner
         Author: zbx.sadman@gmail.com
         DateCreated: 27JAN2016
         DateModified: 26FEB2018
         DateModified: 09AUG2019
+        DateModified: 25SEP2019
         Testing environment: Windows Server 2008R2 SP1, WSUS 3 SP2, Powershell 2
         Non-production testing environment: Windows Server 2012 R2, WSUS 6, PowerShell 4
 
     .LINK  
         https://github.com/zbx-sadman
+
+    .PARAMETER ServerHost
+        Name of host which hosts WSUS server
+
+    .PARAMETER ServerPort
+        WSUS Server's TCP port number
+
+    .PARAMETER ServerSSL
+        Use SSL when connect to WSUS server
 
     .PARAMETER Action
         What need to do with collection or its item:
@@ -51,13 +61,11 @@
 
         Virtual keys for 'LastSynchronization' object:
             NotSyncInDays                        - Now much days was not running Synchronization process;
- 
 
     .PARAMETER Value
         Key specific parameter:
             For 'ComputerTargetsNotReportedWithin' parameter - number of days
             For 'ComputerTargetsNotUpdatedWithin'  parameter - number of days too.
-
 
     .PARAMETER Id
         Used to select only one item from collection
@@ -105,6 +113,12 @@
 
 Param (
    [Parameter(Mandatory = $False)] 
+   [string]$ServerHost,
+   [Parameter(Mandatory = $False)] 
+   [Int32]$ServerPort,
+   [Parameter(Mandatory = $False)] 
+   [switch]$ServerSSL,
+   [Parameter(Mandatory = $False)] 
    [ValidateSet('Discovery', 'Get', 'Count')]
    [string]$Action,
    [Parameter(Mandatory = $False)]
@@ -134,6 +148,11 @@ Param (
 
 # Width of console to stop breaking JSON lines
 Set-Variable -Name "CONSOLE_WIDTH" -Value 255 -Option Constant
+
+# 
+Set-Variable -Name "WSUS_DEFAULT_HOSTNAME"  -Value "localhost" -Option Constant
+Set-Variable -Name "WSUS_DEFAULT_PORT_SSL"  -Value 8530 -Option Constant
+Set-Variable -Name "WSUS_DEFAULT_PORT_HTTP" -Value 80 -Option Constant
 
 ####################################################################################################################################
 #
@@ -378,11 +397,14 @@ If (-Not (Get-Module -List -Name UpdateServices -Verbose:$False)) {
    $UseNativeCmdLets = $False;
 }
 
-Write-Verbose "$(Get-Date) Trying to connect to local WSUS Server"
+If ([string]::IsNullOrEmpty($ServerHost)) { $ServerHost = $WSUS_DEFAULT_HOSTNAME; }
+If (($Null -Eq $ServerPort) -Or (0 -Eq $ServerPort)) { $ServerPort = $( if ($ServerSSL) { $WSUS_DEFAULT_PORT_SSL } else { $WSUS_DEFAULT_PORT_HTTP }); }
+
+Write-Verbose "$(Get-Date) Trying to connect to WSUS Server: $($ServerHost):$($ServerPort)";
 $WSUS = $( if ($UseNativeCmdLets) {
-                 Get-WsusServer;
+                $( if ($ServerSSL) { Get-WsusServer -Name $ServerHost -PortNumber $ServerPort -UseSSL } else { Get-WsusServer -Name $ServerHost -PortNumber $ServerPort } );
               } else {
-                 [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer();
+                 [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer($ServerHost, $ServerSSL, $ServerPort);
               }
 );
 
